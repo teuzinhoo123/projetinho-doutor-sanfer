@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Projetinho Doutor Sanfer</title>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <style>
+        :root {
+            --blue-50: #f0f8ff;
+            --blue-100: #e0f0ff;
+            --blue-500: #007aff;
+            --blue-600: #0056b3;
+            --text-dark: #1d1d1f;
+            --text-light: #86868b;
+            --bg-color: #f2f2f7;
+            --glass-bg: rgba(255, 255, 255, 0.65);
+            --glass-border: rgba(255, 255, 255, 0.4);
+            --shadow-sm: 0 4px 6px rgba(0,0,0,0.04);
+            --shadow-md: 0 10px 20px rgba(0,0,0,0.08);
+            --radius-lg: 20px;
+            --radius-md: 14px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            background-image: radial-gradient(circle at top right, var(--blue-100), transparent 40%),
+                              radial-gradient(circle at bottom left, var(--blue-50), transparent 40%);
+            color: var(--text-dark);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .app-container {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
+            width: 100%;
+            max-width: 600px;
+            min-height: 80vh;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+        }
+
+        h1 { font-size: 28px; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 8px; text-align: center; color: var(--blue-500); }
+        h2 { font-size: 20px; font-weight: 600; margin-bottom: 16px; }
+        p { font-size: 16px; line-height: 1.5; margin-bottom: 16px; color: var(--text-dark); }
+        .subtitle { color: var(--text-light); text-align: center; margin-bottom: 32px; font-size: 15px; }
+
+        button {
+            background: var(--blue-500);
+            color: white;
+            border: none;
+            border-radius: var(--radius-md);
+            padding: 16px 20px;
+            font-size: 17px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.2s ease;
+            margin-bottom: 12px;
+        }
+        button:active { transform: scale(0.98); background: var(--blue-600); }
+        button.secondary { background: rgba(0, 122, 255, 0.1); color: var(--blue-500); }
+        button:disabled { opacity: 0.5; cursor: not-allowed; }
+        
+        .options-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 24px; }
+        .option-btn {
+            background: rgba(255, 255, 255, 0.8);
+            border: 2px solid transparent;
+            color: var(--text-dark);
+            text-align: left;
+            font-weight: 400;
+            display: flex;
+            align-items: flex-start;
+        }
+        .option-btn.selected {
+            border-color: var(--blue-500);
+            background: var(--blue-50);
+            font-weight: 600;
+        }
+        .option-btn.correct { background: #d4edda; border-color: #28a745; color: #155724; }
+        .option-btn.wrong { background: #f8d7da; border-color: #dc3545; color: #721c24; }
+
+        .hud {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            font-size: 14px;
+            color: var(--text-light);
+            font-weight: 600;
+        }
+        .badge {
+            background: var(--blue-100);
+            color: var(--blue-500);
+            padding: 6px 12px;
+            border-radius: 20px;
+        }
+
+        .feedback-box {
+            background: rgba(255,255,255,0.9);
+            border-radius: var(--radius-md);
+            padding: 16px;
+            margin-top: 16px;
+            border-left: 4px solid var(--blue-500);
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+        .feedback-box h4 { margin-bottom: 8px; }
+
+        .hidden { display: none !important; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        @media (min-width: 768px) {
+            .app-container { padding: 40px; max-width: 700px; }
+            h1 { font-size: 34px; }
+        }
+    </style>
+    
+    <!-- Importando os bancos de questões separadamente por área -->
+    <script src="linguagens.js"></script>
+    <script src="humanas.js"></script>
+    <script src="natureza.js"></script>
+    <script src="matematica.js"></script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- TELA INICIAL -->
+        <div id="screen-home">
+            <h1>Doutor Sanfer</h1>
+            <p class="subtitle">Simulador ENEM Pessoal</p>
+            <div style="background: rgba(255,255,255,0.5); padding: 16px; border-radius: 14px; margin-bottom: 24px;">
+                <h3 style="font-size: 14px; color: var(--text-light); margin-bottom: 8px; text-transform: uppercase;">Estatísticas</h3>
+                <p style="margin:0; font-weight: 600;">Questões resolvidas: <span id="stats-total">0</span></p>
+                <p style="margin:0; font-weight: 600;">Taxa de acerto: <span id="stats-accuracy">0%</span></p>
+            </div>
+            <button onclick="startSimulado('todas')">Iniciar Simulado Completo</button>
+            <button class="secondary" onclick="startSimulado('Linguagens')">Treinar Linguagens</button>
+            <button class="secondary" onclick="startSimulado('Humanas')">Treinar Humanas</button>
+            <button class="secondary" onclick="startSimulado('Natureza')">Treinar Natureza</button>
+            <button class="secondary" onclick="startSimulado('Matemática')">Treinar Matemática</button>
+        </div>
+
+        <!-- TELA DE QUESTÃO -->
+        <div id="screen-question" class="hidden">
+            <div class="hud">
+                <span class="badge" id="q-area">Área</span>
+                <span>Questão <span id="q-current">1</span>/<span id="q-total">10</span></span>
+                <span style="color: var(--blue-500);">⏱ <span id="q-timer">00:00</span></span>
+            </div>
+            <div id="q-text" style="margin-bottom: 24px;"></div>
+            <div class="options-list" id="q-options"></div>
+            <button id="btn-confirm" onclick="confirmAnswer()" disabled>Confirmar Resposta</button>
+            <button id="btn-next" class="hidden secondary" onclick="nextQuestion()">Próxima Questão</button>
+            <div id="q-feedback" class="feedback-box">
+                <h4 id="feedback-title">Resultado</h4>
+                <p id="feedback-text" style="font-size: 14px; margin: 0;"></p>
+            </div>
+        </div>
+
+        <!-- TELA DE RESULTADOS -->
+        <div id="screen-results" class="hidden">
+            <h1>Simulado Concluído!</h1>
+            <p class="subtitle">Veja seu desempenho</p>
+            <div style="text-align: center; margin: 32px 0;">
+                <div style="font-size: 64px; font-weight: 700; color: var(--blue-500);" id="res-score">0%</div>
+                <p>Acertos: <span id="res-correct">0</span> de <span id="res-total">0</span></p>
+                <p>Tempo médio por questão: <span id="res-time">0s</span></p>
+            </div>
+            <button onclick="goHome()">Voltar ao Início</button>
+        </div>
+    </div>
+
+    <script>
+        const questionBank = [
+            ...(typeof questoesLinguagens !== 'undefined' ? questoesLinguagens : []),
+            ...(typeof questoesHumanas !== 'undefined' ? questoesHumanas : []),
+            ...(typeof questoesNatureza !== 'undefined' ? questoesNatureza : []),
+            ...(typeof questoesMatematica !== 'undefined' ? questoesMatematica : [])
+        ];
+
+        let currentSimulado = [];
+        let currentIndex = 0;
+        let selectedOption = null;
+        let timerInterval;
+        let questionSeconds = 0;
+        let simuladoData = { correct: 0, totalTime: 0 };
+        
+        let userStats = JSON.parse(localStorage.getItem('sanfer_enem_stats')) || { totalQuestions: 0, totalCorrect: 0 };
+
+        function updateStatsUI() {
+            document.getElementById('stats-total').innerText = userStats.totalQuestions;
+            const accuracy = userStats.totalQuestions === 0 ? 0 : Math.round((userStats.totalCorrect / userStats.totalQuestions) * 100);
+            document.getElementById('stats-accuracy').innerText = accuracy + '%';
+        }
+        updateStatsUI();
+
+        function showScreen(screenId) {
+            document.getElementById('screen-home').classList.add('hidden');
+            document.getElementById('screen-question').classList.add('hidden');
+            document.getElementById('screen-results').classList.add('hidden');
+            document.getElementById(screenId).classList.remove('hidden');
+        }
+
+        function startSimulado(areaFilter) {
+            if (questionBank.length === 0) {
+                alert("Erro: Banco de questões não carregou.");
+                return;
+            }
+            if (areaFilter === 'todas') {
+                currentSimulado = [...questionBank].sort(() => Math.random() - 0.5);
+            } else {
+                currentSimulado = questionBank.filter(q => q.area === areaFilter).sort(() => Math.random() - 0.5);
+            }
+            if (currentSimulado.length === 0) return;
+            currentIndex = 0;
+            simuladoData = { correct: 0, totalTime: 0 };
+            showScreen('screen-question');
+            loadQuestion();
+        }
+
+        function formatTime(seconds) {
+            const m = Math.floor(seconds / 60).toString().padStart(2, '0');
+            const s = (seconds % 60).toString().padStart(2, '0');
+            return `${m}:${s}`;
+        }
+
+        function loadQuestion() {
+            selectedOption = null;
+            questionSeconds = 0;
+            document.getElementById('q-timer').innerText = "00:00";
+            clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                questionSeconds++;
+                document.getElementById('q-timer').innerText = formatTime(questionSeconds);
+            }, 1000);
+            const q = currentSimulado[currentIndex];
+            document.getElementById('q-area').innerText = q.area;
+            document.getElementById('q-current').innerText = currentIndex + 1;
+            document.getElementById('q-total').innerText = currentSimulado.length;
+            document.getElementById('q-text').innerHTML = q.text;
+            const optionsContainer = document.getElementById('q-options');
+            optionsContainer.innerHTML = '';
+            const labels = ['A', 'B', 'C', 'D', 'E'];
+            q.options.forEach((opt, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.innerHTML = `<span style="font-weight:700; min-width: 24px; display: inline-block; color: var(--blue-500);">${labels[index]}</span> <span>${opt}</span>`;
+                btn.onclick = () => selectOption(index, btn);
+                optionsContainer.appendChild(btn);
+            });
+            document.getElementById('btn-confirm').disabled = true;
+            document.getElementById('btn-confirm').classList.remove('hidden');
+            document.getElementById('btn-next').classList.add('hidden');
+            document.getElementById('q-feedback').classList.add('hidden');
+        }
+
+        function selectOption(index, btnElement) {
+            if (!document.getElementById('btn-confirm').classList.contains('hidden')) {
+                selectedOption = index;
+                document.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
+                btnElement.classList.add('selected');
+                document.getElementById('btn-confirm').disabled = false;
+            }
+        }
+
+        function confirmAnswer() {
+            clearInterval(timerInterval);
+            simuladoData.totalTime += questionSeconds;
+            const q = currentSimulado[currentIndex];
+            const isCorrect = (selectedOption === q.correct);
+            userStats.totalQuestions++;
+            if (isCorrect) {
+                userStats.totalCorrect++;
+                simuladoData.correct++;
+            }
+            localStorage.setItem('sanfer_enem_stats', JSON.stringify(userStats));
+            const buttons = document.querySelectorAll('.option-btn');
+            buttons[selectedOption].classList.add(isCorrect ? 'correct' : 'wrong');
+            if (!isCorrect) buttons[q.correct].classList.add('correct');
+            document.getElementById('btn-confirm').classList.add('hidden');
+            document.getElementById('btn-next').classList.remove('hidden');
+            const fbBox = document.getElementById('q-feedback');
+            fbBox.classList.remove('hidden');
+            fbBox.style.borderLeftColor = isCorrect ? '#28a745' : '#dc3545';
+            document.getElementById('feedback-title').innerText = isCorrect ? 'Acertou! 🎉' : 'Errou! 💡';
+            document.getElementById('feedback-title').style.color = isCorrect ? '#28a745' : '#dc3545';
+            document.getElementById('feedback-text').innerHTML = `<strong>Tempo gasto:</strong> ${formatTime(questionSeconds)} <br><br> ${q.explanation}`;
+        }
+
+        function nextQuestion() {
+            currentIndex++;
+            if (currentIndex < currentSimulado.length) {
+                loadQuestion();
+            } else {
+                finishSimulado();
+            }
+        }
+
+        function finishSimulado() {
+            showScreen('screen-results');
+            const pct = Math.round((simuladoData.correct / currentSimulado.length) * 100);
+            const avgTime = Math.round(simuladoData.totalTime / currentSimulado.length);
+            document.getElementById('res-score').innerText = pct + '%';
+            document.getElementById('res-score').style.color = pct >= 70 ? '#28a745' : (pct >= 40 ? '#f0ad4e' : '#dc3545');
+            document.getElementById('res-correct').innerText = simuladoData.correct;
+            document.getElementById('res-total').innerText = currentSimulado.length;
+            document.getElementById('res-time').innerText = formatTime(avgTime);
+            updateStatsUI();
+        }
+
+        function goHome() {
+            showScreen('screen-home');
+        }
+    </script>
+</body>
+</html>
