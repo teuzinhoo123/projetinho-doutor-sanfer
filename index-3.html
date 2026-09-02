@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulado ENEM - Reta Final (Exatas)</title>
+    <style>
+        /* Design Tokens & Variáveis (Arquitetura CSS) */
+        :root {
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --bg-body: #f8fafc;
+            --bg-card: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --success-bg: #dcfce7;
+            --success-border: #22c55e;
+            --error-bg: #fee2e2;
+            --error-border: #ef4444;
+            --radius-lg: 16px;
+            --radius-md: 12px;
+            --radius-sm: 8px;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.1);
+            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.05);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            line-height: 1.6;
+            padding: 2rem 1rem;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        h1 {
+            font-size: 2.25rem;
+            font-weight: 800;
+            letter-spacing: -0.025em;
+            color: var(--text-main);
+            margin-bottom: 0.5rem;
+        }
+
+        p.subtitle {
+            color: var(--text-muted);
+            font-size: 1.125rem;
+        }
+
+        .card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+            box-shadow: var(--shadow-sm);
+            transition: box-shadow 0.2s ease;
+        }
+
+        .card:hover {
+            box-shadow: var(--shadow-md);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .badge {
+            background-color: #e0e7ff;
+            color: #3730a3;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        .question-text {
+            font-size: 1.05rem;
+            margin-bottom: 1.5rem;
+            text-align: justify;
+        }
+
+        .options-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 1rem;
+        }
+
+        .option-label:hover {
+            background-color: #f1f5f9;
+        }
+
+        .option-label input[type="radio"] {
+            margin-right: 1rem;
+            transform: scale(1.2);
+            accent-color: var(--primary);
+        }
+
+        .btn-submit {
+            display: block;
+            width: 100%;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: var(--radius-md);
+            padding: 1.25rem;
+            font-size: 1.125rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            margin-top: 2rem;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .btn-submit:hover {
+            background-color: var(--primary-hover);
+        }
+
+        #resultado {
+            display: none;
+            text-align: center;
+            background-color: var(--bg-card);
+            border: 2px solid var(--primary);
+            border-radius: var(--radius-lg);
+            padding: 2.5rem;
+            margin-top: 2rem;
+        }
+
+        #resultado h2 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: var(--primary);
+        }
+
+        .feedback-correct {
+            background-color: var(--success-bg) !important;
+            border-color: var(--success-border) !important;
+            font-weight: 600;
+        }
+
+        .feedback-incorrect {
+            background-color: var(--error-bg) !important;
+            border-color: var(--error-border) !important;
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Simulado ENEM — Exatas</h1>
+        <p class="subtitle">Treino focado em Matemática e Ciências da Natureza (Padrão 2021-2024)</p>
+    </header>
+
+    <form id="simulado-form">
+        
+        <!-- Questão 1 -->
+        <div class="card" data-correct="c">
+            <div class="card-header">
+                <span class="badge">Matemática - ENEM 2023 (Adaptada)</span>
+                <span class="badge" style="background:#fef08a; color:#854d0e;">Matemática Básica / Porcentagem</span>
+            </div>
+            <div class="question-text">
+                Um gerente decidiu fazer uma liquidação em sua loja, oferecendo um desconto de 20% em todos os produtos. Na semana seguinte, percebendo que as vendas ainda estavam baixas, aplicou um novo desconto de 15% sobre o preço já com o primeiro desconto. O desconto único equivalente que o cliente recebe ao comprar um produto nessa segunda semana é de:
+            </div>
+            <div class="options-group">
+                <label class="option-label"><input type="radio" name="q1" value="a"> a) 35%</label>
+                <label class="option-label"><input type="radio" name="q1" value="b"> b) 30%</label>
+                <label class="option-label"><input type="radio" name="q1" value="c"> c) 32%</label>
+                <label class="option-label"><input type="radio" name="q1" value="d"> d) 28%</label>
+                <label class="option-label"><input type="radio" name="q1" value="e"> e) 15%</label>
+            </div>
+        </div>
+
+        <!-- Questão 2 -->
+        <div class="card" data-correct="b">
+            <div class="card-header">
+                <span class="badge">Matemática - ENEM 2022 (Adaptada)</span>
+                <span class="badge" style="background:#fef08a; color:#854d0e;">Geometria Espacial</span>
+            </div>
+            <div class="question-text">
+                Uma empresa de abastecimento de água possui um reservatório cilíndrico reto com 2 metros de raio e 5 metros de altura. Deseja-se construir um novo reservatório, também cilíndrico, com o dobro da capacidade do primeiro, mas mantendo a mesma altura. O raio da base do novo reservatório deve ser, em metros:
+            </div>
+            <div class="options-group">
+                <label class="option-label"><input type="radio" name="q2" value="a"> a) 4</label>
+                <label class="option-label"><input type="radio" name="q2" value="b"> b) 2√2</label>
+                <label class="option-label"><input type="radio" name="q2" value="c"> c) 2</label>
+                <label class="option-label"><input type="radio" name="q2" value="d"> d) 8</label>
+                <label class="option-label"><input type="radio" name="q2" value="e"> e) 4√2</label>
+            </div>
+        </div>
+
+        <!-- Questão 3 -->
+        <div class="card" data-correct="d">
+            <div class="card-header">
+                <span class="badge">Física - ENEM 2023 (Adaptada)</span>
+                <span class="badge" style="background:#bfdbfe; color:#1e40af;">Eletrodinâmica</span>
+            </div>
+            <div class="question-text">
+                Em um manual de um chuveiro elétrico, encontram-se as seguintes especificações: Tensão 220 V e Potência de 4400 W (na posição Inverno) e 2200 W (na posição Verão). Ao mudar a chave da posição Verão para Inverno, o que ocorre com a resistência elétrica do chuveiro e com a corrente elétrica que o atravessa?
+            </div>
+            <div class="options-group">
+                <label class="option-label"><input type="radio" name="q3" value="a"> a) A resistência dobra e a corrente cai pela metade.</label>
+                <label class="option-label"><input type="radio" name="q3" value="b"> b) A resistência dobra e a corrente dobra.</label>
+                <label class="option-label"><input type="radio" name="q3" value="c"> c) A resistência cai pela metade e a corrente cai pela metade.</label>
+                <label class="option-label"><input type="radio" name="q3" value="d"> d) A resistência cai pela metade e a corrente dobra.</label>
+                <label class="option-label"><input type="radio" name="q3" value="e"> e) A resistência permanece constante e a corrente dobra.</label>
+            </div>
+        </div>
+
+        <!-- Questão 4 -->
+        <div class="card" data-correct="a">
+            <div class="card-header">
+                <span class="badge">Física - ENEM 2021 (Adaptada)</span>
+                <span class="badge" style="background:#bfdbfe; color:#1e40af;">Ondulatória / Acústica</span>
+            </div>
+            <div class="question-text">
+                O som é uma onda mecânica longitudinal. Ao passar do ar para a água, uma onda sonora sofre refração. Sabendo que a velocidade de propagação do som na água é maior do que no ar, o que acontece com a frequência e o comprimento de onda do som após atravessar a interface ar-água?
+            </div>
+            <div class="options-group">
+                <label class="option-label"><input type="radio" name="q4" value="a"> a) A frequência permanece a mesma e o comprimento de onda aumenta.</label>
+                <label class="option-label"><input type="radio" name="q4" value="b"> b) A frequência aumenta e o comprimento de onda diminui.</label>
+                <label class="option-label"><input type="radio" name="q4" value="c"> c) A frequência diminui e o comprimento de onda aumenta.</label>
+                <label class="option-label"><input type="radio" name="q4" value="d"> d) A frequência e o comprimento de onda permanecem os mesmos.</label>
+                <label class="option-label"><input type="radio" name="q4" value="e"> e) A frequência permanece a mesma e o comprimento de onda diminui.</label>
+            </div>
+        </div>
+
+        <!-- Questão 5 -->
+        <div class="card" data-correct="e">
+            <div class="card-header">
+                <span class="badge">Química - ENEM 2022 (Adaptada)</span>
+                <span class="badge" style="background:#bbf7d0; color:#166534;">Química Ambiental / Ciclos</span>
+            </div>
+            <div class="question-text">
+                O ciclo do nitrogênio é fundamental para a manutenção da vida na Terra, pois esse elemento compõe proteínas e ácidos nucleicos. No ciclo, bactérias do gênero <i>Rhizobium</i>, associadas às raízes de leguminosas, realizam um processo crucial para a entrada do nitrogênio na cadeia alimentar. Esse processo é denominado:
+            </div>
+            <div class="options-group">
+                <label class="option-label"><input type="radio" name="q5" value="a"> a) Desnitrificação.</label>
+                <label class="option-label"><input type="radio" name="q5" value="b"> b) Nitrificação.</label>
+                <label class="option-label"><input type="radio" name="q5" value="c"> c) Amonificação.</label>
+                <label class="option-label"><input type="radio" name="q5" value="d"> d) Nitratação.</label>
+                <label class="option-label"><input type="radio" name="q5" value="e"> e) Fixação biológica do nitrogênio.</label>
+            </div>
+        </div>
+
+        <!-- Questão 6 -->
+        <div class="card" data-correct="c">
+            <div class="card-header">
+                <span class="badge">Química - ENEM 2021 (Adaptada)</span>
+                <span class="badge" style="background:#bbf7d0; color:#166534;">Físico-Química / Concentração</span>
+            </div>
+            <div class="question-text">
+                Para o preparo de um soro caseiro, recomenda-se a dissolução de sal (cloreto de sódio) e açúcar (sacarose) em água. Se uma pessoa preparar 500 mL de uma solução aquosa contendo 0,9 g de NaCl, qual será a concentração em g/L desse sal na solução final?
+            </div>
+            <div class="options-group">
+                <label class="option-label"><input type="radio" name="q6" value="a"> a) 0,45 g/L</label>
+                <label class="option-label"><input type="radio" name="q6" value="b"> b) 0,90 g/L</label>
+                <label class="option-label"><input type="radio" name="q6" value="c"> c) 1,80 g/L</label>
+                <label class="option-label"><input type="radio" name="q6" value="d"> d) 4,50 g/L</label>
+                <label class="option-label"><input type="radio" name="q6" value="e"> e) 9,00 g/L</label>
+            </div>
+        </div>
+
+        <button type="button" class="btn-submit" onclick="corrigirSimulado()">Finalizar Simulado e Ver Correção</button>
+    </form>
+
+    <div id="resultado">
+        <h2>Seu Desempenho</h2>
+        <p id="score-text" style="font-size: 1.25rem; margin-bottom: 1rem;"></p>
+        <p style="color: var(--text-muted);">Revise as marcações acima. As respostas corretas estão destacadas em verde.</p>
+        <button type="button" class="btn-submit" style="background-color: var(--text-main); margin-top: 1rem; padding: 1rem;" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">Subir para revisar</button>
+    </div>
+
+</div>
+
+<script>
+    function corrigirSimulado() {
+        const cards = document.querySelectorAll('.card');
+        let acertos = 0;
+
+        cards.forEach((card, index) => {
+            const correctAnswer = card.getAttribute('data-correct');
+            const qName = 'q' + (index + 1);
+            const selectedOption = document.querySelector(`input[name="${qName}"]:checked`);
+            
+            // Limpa formatações anteriores
+            card.querySelectorAll('.option-label').forEach(label => {
+                label.classList.remove('feedback-correct', 'feedback-incorrect');
+            });
+
+            // Destaca a correta
+            const correctInput = card.querySelector(`input[value="${correctAnswer}"]`);
+            if (correctInput) {
+                correctInput.parentElement.classList.add('feedback-correct');
+            }
+
+            if (selectedOption) {
+                if (selectedOption.value === correctAnswer) {
+                    acertos++;
+                } else {
+                    selectedOption.parentElement.classList.add('feedback-incorrect');
+                }
+            }
+        });
+
+        const resultadoDiv = document.getElementById('resultado');
+        const scoreText = document.getElementById('score-text');
+        
+        const total = cards.length;
+        const porcentagem = Math.round((acertos / total) * 100);
+        
+        let mensagem = "";
+        if(porcentagem === 100) mensagem = "Excelente! Gabaritou!";
+        else if (porcentagem >= 70) mensagem = "Muito bom! Reta final a todo vapor.";
+        else if (porcentagem >= 40) mensagem = "Na média! Use os erros para guiar a revisão teórica.";
+        else mensagem = "Não desanime. É errando aqui que se aprende pro dia da prova!";
+
+        scoreText.innerHTML = `Você acertou <strong>${acertos}</strong> de <strong>${total}</strong> questões (${porcentagem}%).<br><br>${mensagem}`;
+        
+        resultadoDiv.style.display = 'block';
+        resultadoDiv.scrollIntoView({ behavior: 'smooth' });
+    }
+</script>
+
+</body>
+</html>
