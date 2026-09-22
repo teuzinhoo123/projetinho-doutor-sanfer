@@ -16,7 +16,7 @@ const KEYS = {
   lastSession: 'rumo_last_session',
 };
 
-const GEMINI_MODEL = 'gemini-3.5-flash';
+const GEMINI_MODEL = 'gemini-1.5-flash';
 
 /* ===================== THEME ===================== */
 function initTheme() {
@@ -68,7 +68,7 @@ document.getElementById('saveGeminiKey').addEventListener('click', () => {
   setTimeout(() => confirm.hidden = true, 2000);
 });
 
-/* ===================== CHIPS (HOME) ===================== */
+/* ===================== CHIPS E LÓGICA DO SIMULADO ===================== */
 let selectedDisciplina = 'Matemática';
 let selectedTipo = 'teoria';
 
@@ -83,7 +83,16 @@ function wireChipGroup(containerId, onSelect) {
   });
 }
 wireChipGroup('chipsDisciplina', v => selectedDisciplina = v);
-wireChipGroup('chipsTipo', v => selectedTipo = v);
+
+wireChipGroup('chipsTipo', v => {
+  selectedTipo = v;
+  const wrapper = document.getElementById('wrapperDisciplina');
+  if (v === 'simulado') {
+    wrapper.classList.add('disabled');
+  } else {
+    wrapper.classList.remove('disabled');
+  }
+});
 
 /* ===================== DASHBOARD ===================== */
 function greeting() {
@@ -93,14 +102,17 @@ function greeting() {
   return 'Boa noite! Bora estudar?';
 }
 
+function tipoLabel(tipo) {
+  return { teoria: 'Teoria', exercicio: 'Exercício', simulado: 'Simulado', redacao: 'Redação' }[tipo] || tipo;
+}
+
 function renderDashboard() {
   document.getElementById('greetingText').textContent = greeting();
-
   const last = store.get(KEYS.lastSession, null);
   const btnContinuar = document.getElementById('btnContinuar');
   if (last) {
     btnContinuar.hidden = false;
-    document.getElementById('continueDetail').textContent = `${last.disciplina} · ${tipoLabel(last.tipo)}`;
+    document.getElementById('continueDetail').textContent = `${last.disciplina || 'Geral'} · ${tipoLabel(last.tipo)}`;
   } else {
     btnContinuar.hidden = true;
   }
@@ -120,10 +132,6 @@ function renderDashboard() {
   const schedule = store.get(KEYS.schedule, []);
   const todays = schedule.filter(t => t.date === today).sort((a, b) => a.hora.localeCompare(b.hora));
   renderTaskList(document.getElementById('todayTasks'), todays, 'Nenhuma tarefa para hoje. Que tal adicionar uma no cronograma?');
-}
-
-function tipoLabel(tipo) {
-  return { teoria: 'Teoria', exercicio: 'Exercício', revisao: 'Revisão', simulado: 'Simulado', redacao: 'Redação' }[tipo] || tipo;
 }
 
 function renderTaskList(container, tasks, emptyMsg) {
@@ -159,27 +167,45 @@ function toggleTask(id) {
   renderCalendar();
 }
 
-/* Roteamento inteligente: Teoria -> Recursos filtrado | Exercícios/Revisão/Simulado -> Questões filtradas */
 function startStudySession(disciplina, tipo) {
-  store.set(KEYS.lastSession, { disciplina, tipo, timestamp: Date.now() });
+  store.set(KEYS.lastSession, { disciplina: tipo === 'simulado' ? null : disciplina, tipo, timestamp: Date.now() });
+  
   if (tipo === 'teoria') {
     focusMateria = disciplina;
     showView('recursos');
+  } else if (tipo === 'simulado') {
+    openModal('modalSimulado');
   } else {
+    pomodoro.isSimulado = false;
+    pomodoro.mode = 'focus';
+    pomodoro.remaining = pomodoro.focusSecs;
+    clearInterval(pomodoro.timer);
+    pomodoro.running = false;
+    renderPomodoro();
     showView('questoes');
     loadQuestion(disciplina);
   }
 }
 
-document.getElementById('btnComecar').addEventListener('click', () => {
-  startStudySession(selectedDisciplina, selectedTipo);
-});
-
+document.getElementById('btnComecar').addEventListener('click', () => startStudySession(selectedDisciplina, selectedTipo));
 document.getElementById('btnContinuar').addEventListener('click', () => {
   const last = store.get(KEYS.lastSession, null);
-  if (!last) return;
-  startStudySession(last.disciplina, last.tipo);
+  if (last) startStudySession(last.disciplina, last.tipo);
 });
+
+document.getElementById('btnSimuladoDia1').addEventListener('click', () => { closeModal('modalSimulado'); startSimulado(5.5 * 3600); });
+document.getElementById('btnSimuladoDia2').addEventListener('click', () => { closeModal('modalSimulado'); startSimulado(5 * 3600); });
+
+function startSimulado(seconds) {
+  pomodoro.isSimulado = true;
+  pomodoro.remaining = seconds;
+  pomodoro.running = true;
+  clearInterval(pomodoro.timer);
+  pomodoro.timer = setInterval(tickPomodoro, 1000);
+  renderPomodoro();
+  showView('questoes');
+  loadQuestion(null);
+}
 
 /* ===================== CALENDÁRIO ===================== */
 let weekOffset = 0;
@@ -187,8 +213,7 @@ let selectedDate = new Date().toISOString().slice(0, 10);
 
 function startOfWeek(date) {
   const d = new Date(date);
-  const day = d.getDay();
-  d.setDate(d.getDate() - day);
+  d.setDate(d.getDate() - d.getDay());
   return d;
 }
 
@@ -224,7 +249,6 @@ function renderCalendar() {
 
 document.getElementById('weekPrev').addEventListener('click', () => { weekOffset--; renderCalendar(); });
 document.getElementById('weekNext').addEventListener('click', () => { weekOffset++; renderCalendar(); });
-
 document.getElementById('btnAddBloco').addEventListener('click', () => {
   document.getElementById('blocoData').value = selectedDate;
   openModal('modalBloco');
@@ -245,125 +269,51 @@ document.getElementById('saveBloco').addEventListener('click', () => {
   renderCalendar();
 });
 
-/* ===================== QUESTÕES: ADAPTADORES MULTI-API ===================== */
+/* ===================== TRADUTOR DE MARKDOWN ===================== */
+function parseMarkdownToHTML(text) {
+  if (!text) return '';
+  let html = text.toString();
+  
+  html = html.replace(/!\[.*?\]\((.*?)\)/g, '<img src="$1" class="q-image-inline" alt="Imagem da questão">');
+  html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+  html = html.replace(/\*(.*?)\*/g, '<em>$1</em>');
+  html = html.replace(/\n\n/g, '<br><br>');
+  html = html.replace(/\n/g, '<br>');
+  
+  return html;
+}
+
+/* ===================== QUESTÕES: FETCH E LÓGICA ===================== */
 const MOCK_QUESTIONS = [
   {
     id: 'mock-1', source: 'Banco local', materia: 'Matemática',
     enunciado: 'Uma loja vende um produto por R$ 240,00 à vista ou em 3 parcelas iguais com juros de 5% ao mês sobre o valor parcelado. Qual o valor aproximado de cada parcela?',
-    imagem: null,
-    alternativas: [
-      { letra: 'A', texto: 'R$ 80,00' },
-      { letra: 'B', texto: 'R$ 84,00' },
-      { letra: 'C', texto: 'R$ 88,20' },
-      { letra: 'D', texto: 'R$ 92,40' },
-      { letra: 'E', texto: 'R$ 96,00' }
-    ],
+    alternativas: [{ letra: 'A', texto: 'R$ 80,00' }, { letra: 'B', texto: 'R$ 84,00' }, { letra: 'C', texto: 'R$ 88,20' }, { letra: 'D', texto: 'R$ 92,40' }, { letra: 'E', texto: 'R$ 96,00' }],
     correta: 'C'
-  },
-  {
-    id: 'mock-2', source: 'Banco local', materia: 'Linguagens',
-    enunciado: 'Em textos argumentativos, a coesão referencial tem papel central na construção do sentido. Assinale a alternativa em que o termo destacado retoma corretamente um elemento anterior do texto: "A educação pública brasileira enfrenta desafios estruturais. ELA precisa de investimento contínuo."',
-    imagem: null,
-    alternativas: [
-      { letra: 'A', texto: '"Ela" retoma "educação pública brasileira"' },
-      { letra: 'B', texto: '"Ela" retoma "desafios estruturais"' },
-      { letra: 'C', texto: '"Ela" retoma "investimento"' },
-      { letra: 'D', texto: '"Ela" não possui referente no texto' },
-      { letra: 'E', texto: '"Ela" retoma o texto como um todo' }
-    ],
-    correta: 'A'
-  },
-  {
-    id: 'mock-3', source: 'Banco local', materia: 'Ciências da Natureza',
-    enunciado: 'O desmatamento da Amazônia altera o regime de chuvas em regiões distantes da floresta devido a um fenômeno conhecido como "rios voadores". Esse fenômeno está diretamente relacionado a qual processo do ciclo hidrológico?',
-    imagem: null,
-    alternativas: [
-      { letra: 'A', texto: 'Infiltração' },
-      { letra: 'B', texto: 'Escoamento superficial' },
-      { letra: 'C', texto: 'Evapotranspiração' },
-      { letra: 'D', texto: 'Condensação nas geleiras' },
-      { letra: 'E', texto: 'Percolação subterrânea' }
-    ],
-    correta: 'C'
-  },
-  {
-    id: 'mock-4', source: 'Banco local', materia: 'Ciências Humanas',
-    enunciado: 'Durante a Guerra Fria, o mundo se organizou em torno de dois blocos ideológicos antagônicos. Qual par representa corretamente essas potências e suas respectivas ideologias?',
-    imagem: null,
-    alternativas: [
-      { letra: 'A', texto: 'Estados Unidos (socialismo) e URSS (capitalismo)' },
-      { letra: 'B', texto: 'Estados Unidos (capitalismo) e URSS (socialismo)' },
-      { letra: 'C', texto: 'França (capitalismo) e China (socialismo)' },
-      { letra: 'D', texto: 'Alemanha (socialismo) e Japão (capitalismo)' },
-      { letra: 'E', texto: 'Reino Unido (socialismo) e Cuba (capitalismo)' }
-    ],
-    correta: 'B'
   }
 ];
 
 const QUESTION_SOURCES = [
   {
-    name: 'enem-api (yunger7)',
-    url: 'https://api.enem.dev/v1/exams/2022/questions?limit=10',
+    name: 'ENEM API',
+    url: 'https://api.enem.dev/v1/exams/2022/questions?limit=50',
     parse(data) {
       const list = data.questions || data.data || data;
-      return list.map((q, i) => ({
-        id: 'enemdev-' + (q.index || i),
-        source: 'enem.dev',
-        materia: q.discipline || null,
-        enunciado: q.context || q.title || q.alternativesIntroduction || '',
-        imagem: q.files && q.files[0] ? q.files[0] : null,
-        alternativas: (q.alternatives || []).map(a => ({ letra: a.letter, texto: a.text })),
-        correta: q.correctAlternative
-      }));
-    }
-  },
-  {
-    name: 'docs.enem.dev',
-    url: 'https://docs.enem.dev/api/questions?limit=10',
-    parse(data) {
-      const list = data.results || data;
-      return list.map((q, i) => ({
-        id: 'docs-' + i,
-        source: 'docs.enem.dev',
-        materia: q.discipline || null,
-        enunciado: q.enunciado || q.statement || '',
-        imagem: q.image || null,
-        alternativas: (q.options || []).map((t, idx) => ({ letra: String.fromCharCode(65 + idx), texto: t })),
-        correta: q.answer
-      }));
-    }
-  },
-  {
-    name: 'ENEM Hub',
-    url: 'https://platform.enemhub.com.br/api/questions?size=10',
-    parse(data) {
-      const list = data.content || data;
-      return list.map((q, i) => ({
-        id: 'hub-' + i,
-        source: 'ENEM Hub',
-        materia: q.discipline || null,
-        enunciado: q.statement || q.text || '',
-        imagem: q.imageUrl || null,
-        alternativas: (q.alternatives || []).map(a => ({ letra: a.letter, texto: a.description })),
-        correta: q.correctAlternative
-      }));
-    }
-  },
-  {
-    name: 'API das Questões',
-    url: 'https://apidasquestoes.com.br/enem/questoes?limit=10',
-    parse(data) {
-      const list = data.questoes || data;
-      return list.map((q, i) => ({
-        id: 'apidasq-' + i,
-        source: 'API das Questões',
-        materia: q.materia || null,
-        enunciado: q.enunciado || '',
-        imagem: q.imagem || null,
-        alternativas: (q.alternativas || []).map(a => ({ letra: a.letra, texto: a.texto })),
-        correta: q.gabarito
-      }));
+      return list.map((q, i) => {
+        let enunciadoFinal = '';
+        if (q.context) enunciadoFinal += q.context + '\n\n';
+        if (q.alternativesIntroduction) enunciadoFinal += q.alternativesIntroduction;
+        else if (q.title) enunciadoFinal += q.title;
+
+        return {
+          id: 'enemdev-' + Date.now() + '-' + i,
+          source: 'Questões ENEM',
+          materia: q.discipline || null,
+          enunciado: enunciadoFinal,
+          alternativas: (q.alternatives || []).map(a => ({ letra: a.letter, texto: a.text })),
+          correta: q.correctAlternative
+        };
+      });
     }
   }
 ];
@@ -375,13 +325,23 @@ async function fetchQuestionsFromAPIs() {
       if (!res.ok) throw new Error('HTTP ' + res.status);
       const data = await res.json();
       const parsed = src.parse(data).filter(q => q.enunciado && q.alternativas.length);
-      if (parsed.length) return parsed;
+      if (parsed.length > 0) return parsed;
     } catch (err) {
-      console.warn(`Fonte "${src.name}" falhou, tentando próxima...`, err.message);
+      console.warn(`Fonte falhou.`, err.message);
     }
   }
-  console.info('Todas as fontes externas falharam. Usando banco local de questões.');
   return MOCK_QUESTIONS;
+}
+
+function checkMateriaMatch(apiMateria, filter) {
+  if (!apiMateria || !filter) return false;
+  const a = apiMateria.toLowerCase();
+  const b = filter.toLowerCase();
+  if (b.includes('natureza') && a.includes('natureza')) return true;
+  if (b.includes('humanas') && a.includes('humanas')) return true;
+  if (b.includes('linguagens') && a.includes('linguagens')) return true;
+  if (b.includes('matemática') && (a.includes('matemática') || a.includes('matematica'))) return true;
+  return false;
 }
 
 let questionQueue = [];
@@ -391,56 +351,84 @@ let activeMateriaFilter = null;
 async function loadQuestion(materiaFilter) {
   if (materiaFilter !== undefined) activeMateriaFilter = materiaFilter;
   const area = document.getElementById('questaoArea');
-  area.innerHTML = `<div class="empty-state">Carregando questão...</div>`;
-  document.getElementById('questoesTitle').textContent = activeMateriaFilter ? `Questões · ${activeMateriaFilter}` : 'Questões';
+  
+  area.innerHTML = `<div class="empty-state">Buscando questão...</div>`;
+  document.getElementById('questoesTitle').textContent = pomodoro.isSimulado ? 'Simulado ENEM' : 'Questões';
 
-  if (!questionQueue.length) questionQueue = await fetchQuestionsFromAPIs();
-  let pool = questionQueue;
-  if (activeMateriaFilter) {
-    const filtered = pool.filter(q => q.materia === activeMateriaFilter);
-    pool = filtered.length ? filtered : MOCK_QUESTIONS.filter(q => q.materia === activeMateriaFilter);
+  try {
+    if (!questionQueue.length) {
+      questionQueue = await fetchQuestionsFromAPIs();
+    }
+    
+    let pool = questionQueue;
+    
+    if (activeMateriaFilter && !pomodoro.isSimulado) {
+      let filtered = pool.filter(q => checkMateriaMatch(q.materia, activeMateriaFilter));
+      
+      if (filtered.length === 0) {
+        const moreData = await fetchQuestionsFromAPIs();
+        questionQueue.push(...moreData);
+        filtered = questionQueue.filter(q => checkMateriaMatch(q.materia, activeMateriaFilter));
+      }
+      
+      pool = filtered.length ? filtered : MOCK_QUESTIONS.filter(q => q.materia === activeMateriaFilter);
+    }
+    
+    if (!pool.length) pool = MOCK_QUESTIONS;
+
+    currentQuestion = pool[Math.floor(Math.random() * pool.length)];
+    questionQueue = questionQueue.filter(q => q.id !== currentQuestion.id);
+    
+    renderQuestion(currentQuestion);
+  } catch (err) {
+    area.innerHTML = `<div class="empty-state">Erro ao carregar. Tente de novo.</div>`;
   }
-  if (!pool.length) pool = MOCK_QUESTIONS;
-
-  currentQuestion = pool[Math.floor(Math.random() * pool.length)];
-  questionQueue = questionQueue.filter(q => q.id !== currentQuestion.id);
-  renderQuestion(currentQuestion);
 }
 
 function renderQuestion(q) {
   const area = document.getElementById('questaoArea');
+  const isFilterActive = activeMateriaFilter && !pomodoro.isSimulado;
+  
   area.innerHTML = `
-    ${activeMateriaFilter ? `<div class="filter-note">Filtrando por ${activeMateriaFilter} <button id="btnLimparFiltro" style="border:none;background:none;color:inherit;font-weight:700;cursor:pointer;">✕</button></div>` : ''}
+    ${isFilterActive ? `<div class="filter-badge">Filtro ativo: ${activeMateriaFilter} <button id="btnLimparFiltro" title="Remover filtro">✕</button></div>` : ''}
     <div class="question-card">
-      <div class="q-meta"><span class="q-source">${q.source}</span></div>
-      ${q.imagem ? `<img class="q-image" src="${q.imagem}" alt="Imagem da questão">` : ''}
-      <p class="q-enunciado">${q.enunciado}</p>
+      <div class="q-meta"><span class="q-source">${q.source || 'ENEM'}</span></div>
+      <p class="q-enunciado">${parseMarkdownToHTML(q.enunciado)}</p>
       <div id="qAlts"></div>
       <div id="qFeedback"></div>
       <div class="q-actions" id="qActions">
         <button class="btn btn-ghost" id="btnPularQuestao">Pular</button>
-        <button class="btn btn-outline" id="btnExplicarIA">Professor IA: Me explica?</button>
+        <button class="btn btn-outline" id="btnExplicarIA">Professor IA</button>
       </div>
     </div>
   `;
+  
   const altsEl = document.getElementById('qAlts');
   q.alternativas.forEach(alt => {
     const el = document.createElement('div');
     el.className = 'q-alt';
-    el.innerHTML = `<span class="q-alt-letter">${alt.letra}</span><span>${alt.texto}</span>`;
+    el.innerHTML = `<span class="q-alt-letter">${alt.letra}</span><span>${parseMarkdownToHTML(alt.texto)}</span>`;
     el.addEventListener('click', () => answerQuestion(q, alt.letra));
     el.dataset.letra = alt.letra;
     altsEl.appendChild(el);
   });
+  
   document.getElementById('btnPularQuestao').addEventListener('click', () => loadQuestion());
   document.getElementById('btnExplicarIA').addEventListener('click', () => explainWithAI(q, null));
   const btnLimpar = document.getElementById('btnLimparFiltro');
-  if (btnLimpar) btnLimpar.addEventListener('click', (e) => { e.stopPropagation(); loadQuestion(null); });
+  if (btnLimpar) {
+    btnLimpar.addEventListener('click', (e) => { 
+      e.stopPropagation(); 
+      activeMateriaFilter = null; 
+      loadQuestion(null); 
+    });
+  }
 }
 
 function answerQuestion(q, chosenLetter) {
   const alts = document.querySelectorAll('.q-alt');
   if (document.querySelector('.q-alt.correct, .q-alt.wrong')) return;
+  
   alts.forEach(el => {
     el.style.cursor = 'default';
     if (el.dataset.letra === q.correta) el.classList.add('correct');
@@ -464,7 +452,7 @@ function answerQuestion(q, chosenLetter) {
   const actions = document.getElementById('qActions');
   actions.innerHTML = `
     <button class="btn btn-primary" id="btnProximaQuestao">Próxima questão</button>
-    <button class="btn btn-outline" id="btnExplicarIA">Professor IA: Me explica?</button>
+    <button class="btn btn-outline" id="btnExplicarIA">Professor IA</button>
   `;
   document.getElementById('btnProximaQuestao').addEventListener('click', () => loadQuestion());
   document.getElementById('btnExplicarIA').addEventListener('click', () => explainWithAI(q, chosenLetter));
@@ -488,38 +476,29 @@ document.getElementById('btnErrosView').addEventListener('click', () => {
   });
 });
 
-/* ===================== FORMATAÇÃO MARKDOWN SIMPLES ===================== */
-function markdownToHtml(text) {
-  const lines = text.split('\n');
-  let html = '';
-  let inList = false;
-  lines.forEach(line => {
-    const trimmed = line.trim();
-    const isBullet = /^[-*]\s+/.test(trimmed);
-    const isNumbered = /^\d+[.)]\s+/.test(trimmed);
-    if (isBullet || isNumbered) {
-      if (!inList) { html += '<ul>'; inList = true; }
-      html += `<li>${trimmed.replace(/^[-*]\s+|^\d+[.)]\s+/, '')}</li>`;
-    } else {
-      if (inList) { html += '</ul>'; inList = false; }
-      if (trimmed) html += `<p>${trimmed}</p>`;
-    }
-  });
-  if (inList) html += '</ul>';
-  return html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>').replace(/\*(.+?)\*/g, '<em>$1</em>');
-}
-
 /* ===================== PROFESSOR IA (GEMINI) ===================== */
 async function callGemini(prompt) {
   const key = store.get(KEYS.geminiKey, '');
   if (!key) throw new Error('SEM_CHAVE');
+  
   const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key },
     body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
   });
+  
   const data = await res.json();
-  if (!res.ok) throw new Error(data.error?.message || 'Erro na API do Gemini');
+  
+  if (!res.ok) {
+    if (res.status === 503 || res.status === 429 || (data.error && data.error.message.toLowerCase().includes('high demand'))) {
+      throw new Error('OVERLOAD');
+    }
+    if (res.status === 400 || res.status === 401 || res.status === 403) {
+      throw new Error('INVALID_KEY');
+    }
+    throw new Error(data.error?.message || 'Erro desconhecido na API do Gemini');
+  }
+  
   return data.candidates?.[0]?.content?.parts?.[0]?.text || 'Não foi possível gerar uma resposta.';
 }
 
@@ -527,20 +506,27 @@ async function explainWithAI(q, chosenLetter) {
   document.getElementById('iaModalTitle').textContent = 'Professor IA';
   openModal('modalIA');
   const content = document.getElementById('iaContent');
+  
   if (!store.get(KEYS.geminiKey, '')) {
-    content.innerHTML = `<p>Você ainda não configurou sua chave da API do Gemini. Toque no ícone de engrenagem no topo para adicionar sua chave gratuita.</p>`;
+    content.innerHTML = `<p>Você ainda não configurou sua chave da API do Gemini. Toque no ícone de engrenagem no topo para adicionar.</p>`;
     return;
   }
-  content.innerHTML = `<div class="ia-loading"><span class="spinner"></span> Gerando explicação...</div>`;
+  content.innerHTML = `<div class="ia-loading"><span class="spinner"></span> Analisando a questão...</div>`;
 
   const altsText = q.alternativas.map(a => `${a.letra}) ${a.texto}`).join('\n');
-  const prompt = `Você é um professor de cursinho pré-vestibular, didático e encorajador. Explique de forma clara e passo a passo a seguinte questão estilo ENEM, indicando por que a alternativa correta (${q.correta}) está certa e, se o aluno errou, por que a alternativa escolhida (${chosenLetter || 'nenhuma ainda'}) está incorreta. Use linguagem simples, em português do Brasil, em no máximo 180 palavras.\n\nEnunciado: ${q.enunciado}\n\nAlternativas:\n${altsText}`;
+  const prompt = `Você é um professor de cursinho pré-vestibular. Explique de forma didática a seguinte questão, indicando por que a alternativa correta (${q.correta}) está certa e por que a alternativa que o aluno escolheu (${chosenLetter || 'ele não escolheu'}) está incorreta. Seja breve, no máximo 180 palavras.\n\nEnunciado: ${q.enunciado}\n\nAlternativas:\n${altsText}`;
 
   try {
     const text = await callGemini(prompt);
-    content.innerHTML = markdownToHtml(text);
+    content.innerHTML = parseMarkdownToHTML(text);
   } catch (err) {
-    content.innerHTML = `<p>Erro ao consultar o Professor IA: ${err.message}. Verifique se sua chave é válida em Configurações.</p>`;
+    if (err.message === 'OVERLOAD') {
+      content.innerHTML = `<p>O servidor do Professor IA está tomando um fôlego porque há muitos acessos agora. Tente novamente em alguns segundos! 🧘‍♂️</p>`;
+    } else if (err.message === 'INVALID_KEY' || err.message === 'SEM_CHAVE') {
+      content.innerHTML = `<p>Sua chave de acesso é inválida. Verifique se copiou corretamente em Configurações.</p>`;
+    } else {
+      content.innerHTML = `<p>Erro ao consultar: ${err.message}</p>`;
+    }
   }
 }
 
@@ -548,68 +534,34 @@ async function learnTopic(materia, topico) {
   document.getElementById('iaModalTitle').textContent = topico;
   openModal('modalIA');
   const content = document.getElementById('iaContent');
+  
   if (!store.get(KEYS.geminiKey, '')) {
-    content.innerHTML = `<p>Você ainda não configurou sua chave da API do Gemini. Toque no ícone de engrenagem no topo para adicionar sua chave gratuita.</p>`;
+    content.innerHTML = `<p>Configure sua chave da API do Gemini nas configurações.</p>`;
     return;
   }
   content.innerHTML = `<div class="ia-loading"><span class="spinner"></span> Preparando mini-aula...</div>`;
 
-  const prompt = `Atue como um professor de cursinho focado no ENEM. Explique o tema ${topico} de forma didática e clara, incluindo um exemplo prático ou macete. Contexto: matéria de ${materia}. Responda em português do Brasil, em no máximo 220 palavras.`;
+  const prompt = `Atue como um professor de cursinho focado no ENEM. Explique o tema ${topico} (Matéria: ${materia}) de forma didática e clara, incluindo um macete. Responda em português do Brasil, máximo 200 palavras. Use formatação em Markdown (negritos e tópicos).`;
 
   try {
     const text = await callGemini(prompt);
-    content.innerHTML = markdownToHtml(text);
+    content.innerHTML = parseMarkdownToHTML(text);
   } catch (err) {
-    content.innerHTML = `<p>Erro ao consultar o Professor IA: ${err.message}. Verifique se sua chave é válida em Configurações.</p>`;
+    if (err.message === 'OVERLOAD') {
+      content.innerHTML = `<p>O servidor está ocupado no momento. Respire fundo e tente em alguns segundos! 🧘‍♂️</p>`;
+    } else {
+      content.innerHTML = `<p>Erro: ${err.message}</p>`;
+    }
   }
 }
 
-/* ===================== MOMENTO REDAÇÃO ===================== */
+/* ===================== REDAÇÃO ===================== */
 const ESSAY_THEMES = [
-  {
-    ano: 2023,
-    tema: 'Desafios para o enfrentamento da invisibilidade do trabalho de cuidado realizado pela mulher no Brasil',
-    instrucoes: 'A partir da leitura dos textos motivadores e com base nos conhecimentos construídos ao longo de sua formação, redija um texto dissertativo-argumentativo em modalidade escrita formal da língua portuguesa sobre o tema, apresentando proposta de intervenção que respeite os direitos humanos.',
-    motivadores: [
-      { titulo: 'Texto I', texto: 'O trabalho de cuidado, historicamente atribuído às mulheres, envolve atividades como cuidar de crianças, idosos e do lar. Embora essencial para a manutenção da sociedade, esse trabalho raramente é reconhecido, remunerado ou contabilizado nas estatísticas econômicas oficiais, o que perpetua desigualdades de gênero no mercado de trabalho e na distribuição de renda.' },
-      { titulo: 'Texto II', texto: 'Pesquisas mostram que mulheres dedicam, em média, o dobro de horas semanais a afazeres domésticos e cuidados não remunerados em comparação aos homens. Essa sobrecarga limita o tempo disponível para qualificação profissional, lazer e participação política, restringindo a autonomia econômica feminina.' },
-      { titulo: 'Texto III', texto: 'Países que implementaram políticas públicas de valorização do cuidado, como creches gratuitas e licença parental equilibrada entre os gêneros, registraram aumento na participação feminina no mercado formal de trabalho e redução das desigualdades salariais entre homens e mulheres.' }
-    ]
-  },
-  {
-    ano: 2022,
-    tema: 'Desafios para a valorização de comunidades e povos tradicionais no Brasil',
-    instrucoes: 'A partir da leitura dos textos motivadores e com base nos conhecimentos construídos ao longo de sua formação, redija um texto dissertativo-argumentativo em modalidade escrita formal da língua portuguesa sobre o tema, apresentando proposta de intervenção que respeite os direitos humanos.',
-    motivadores: [
-      { titulo: 'Texto I', texto: 'Povos indígenas, quilombolas, ribeirinhos e outras comunidades tradicionais mantêm modos de vida e saberes ancestrais que contribuem para a preservação ambiental e a diversidade cultural do país, mas frequentemente enfrentam invisibilidade social e disputas territoriais.' },
-      { titulo: 'Texto II', texto: 'A demarcação de terras tradicionais é um processo lento e frequentemente contestado judicialmente, o que gera insegurança para essas populações e favorece o avanço de atividades como garimpo ilegal, desmatamento e grilagem sobre seus territórios.' },
-      { titulo: 'Texto III', texto: 'Iniciativas de educação escolar indígena e quilombola, quando implementadas com participação das próprias comunidades, fortalecem a identidade cultural, a autoestima e a permanência dos jovens em seus territórios de origem.' }
-    ]
-  },
-  {
-    ano: 2021,
-    tema: 'Invisibilidade e registro civil: garantia de acesso à cidadania no Brasil',
-    instrucoes: 'A partir da leitura dos textos motivadores e com base nos conhecimentos construídos ao longo de sua formação, redija um texto dissertativo-argumentativo em modalidade escrita formal da língua portuguesa sobre o tema, apresentando proposta de intervenção que respeite os direitos humanos.',
-    motivadores: [
-      { titulo: 'Texto I', texto: 'O registro civil de nascimento é a porta de entrada para o exercício da cidadania, permitindo acesso a serviços de saúde, educação, benefícios sociais e documentos posteriores como CPF e título de eleitor. Sua ausência mantém milhões de brasileiros à margem de direitos básicos.' },
-      { titulo: 'Texto II', texto: 'A subnotificação de registros é mais comum em regiões remotas, como áreas rurais da Amazônia e comunidades ribeirinhas, onde o acesso a cartórios é limitado pela distância e pela falta de informação sobre a gratuidade do serviço.' },
-      { titulo: 'Texto III', texto: 'Mutirões de registro civil realizados em parceria entre cartórios, prefeituras e maternidades têm reduzido significativamente o número de subnotificações em regiões prioritárias, aproximando o Estado de populações historicamente invisibilizadas.' }
-    ]
-  },
-  {
-    ano: 2020,
-    tema: 'O estigma associado às doenças mentais na sociedade brasileira',
-    instrucoes: 'A partir da leitura dos textos motivadores e com base nos conhecimentos construídos ao longo de sua formação, redija um texto dissertativo-argumentativo em modalidade escrita formal da língua portuguesa sobre o tema, apresentando proposta de intervenção que respeite os direitos humanos.',
-    motivadores: [
-      { titulo: 'Texto I', texto: 'Pessoas com transtornos mentais frequentemente enfrentam preconceito e discriminação, o que dificulta a busca por tratamento adequado e a reinserção social, perpetuando ciclos de sofrimento e exclusão.' },
-      { titulo: 'Texto II', texto: 'A falta de informação sobre saúde mental favorece a circulação de estigmas e estereótipos, associando erroneamente transtornos psiquiátricos à periculosidade ou incapacidade, o que afasta pacientes de diagnósticos e tratamentos precoces.' },
-      { titulo: 'Texto III', texto: 'Campanhas de conscientização e a ampliação da rede de Centros de Atenção Psicossocial (CAPS) têm mostrado resultados positivos na redução do preconceito e no acolhimento de pessoas em sofrimento psíquico.' }
-    ]
-  }
+  { ano: 2023, tema: 'Desafios para o enfrentamento da invisibilidade do trabalho de cuidado realizado pela mulher no Brasil', instrucoes: 'A partir da leitura dos textos motivadores...', motivadores: [{ titulo: 'Texto I', texto: 'O trabalho de cuidado, historicamente atribuído às mulheres...' }] },
+  { ano: 2022, tema: 'Desafios para a valorização de comunidades e povos tradicionais no Brasil', instrucoes: 'Redija um texto dissertativo-argumentativo...', motivadores: [{ titulo: 'Texto I', texto: 'Povos indígenas e quilombolas mantêm modos de vida que contribuem...' }] }
 ];
 
-let activeEssayIndex = 0;
-let activeMotivIndex = 0;
+let activeEssayIndex = 0; let activeMotivIndex = 0;
 
 function renderRedacao() {
   const tabsEl = document.getElementById('redacaoTabs');
@@ -623,8 +575,7 @@ function renderRedacao() {
   });
 
   const theme = ESSAY_THEMES[activeEssayIndex];
-  const content = document.getElementById('redacaoContent');
-  content.innerHTML = `
+  document.getElementById('redacaoContent').innerHTML = `
     <span class="essay-year">ENEM ${theme.ano}</span>
     <h3 class="essay-title">${theme.tema}</h3>
     <p class="essay-instructions">${theme.instrucoes}</p>
@@ -644,19 +595,36 @@ function renderRedacao() {
 
 document.getElementById('btnGerarTema').addEventListener('click', () => {
   let novoIndex;
-  do { novoIndex = Math.floor(Math.random() * ESSAY_THEMES.length); }
-  while (novoIndex === activeEssayIndex && ESSAY_THEMES.length > 1);
-  activeEssayIndex = novoIndex;
-  activeMotivIndex = 0;
-  renderRedacao();
+  do { novoIndex = Math.floor(Math.random() * ESSAY_THEMES.length); } while (novoIndex === activeEssayIndex && ESSAY_THEMES.length > 1);
+  activeEssayIndex = novoIndex; activeMotivIndex = 0; renderRedacao();
 });
 
-/* ===================== HUB DE RECURSOS (GUIA DE ESTUDOS IA) ===================== */
+/* ===================== HUB DE RECURSOS TURBINADO ===================== */
 const STUDY_TOPICS = {
-  'Matemática': ['Porcentagem', 'Regra de Três', 'Funções do 1º e 2º grau', 'Geometria Plana e Espacial'],
-  'Ciências da Natureza': ['Ecologia e Cadeias Alimentares', 'Citologia', 'Leis de Newton', 'Estequiometria'],
-  'Linguagens': ['Funções da Linguagem', 'Figuras de Linguagem', 'Interpretação de Texto', 'Literatura Modernista'],
-  'Ciências Humanas': ['Era Vargas', 'Guerra Fria', 'Geopolítica Contemporânea', 'Urbanização Brasileira']
+  'Matemática': [
+    'Matemática Financeira e Porcentagem', 'Razão e Proporção', 'Regra de Três (Simples e Composta)',
+    'Leitura de Gráficos e Tabelas', 'Estatística (Média, Moda e Mediana)', 'Funções do 1º e 2º grau', 
+    'Geometria Plana (Áreas e Perímetros)', 'Geometria Espacial (Cálculo de Volume)', 'Trigonometria Básica', 
+    'Probabilidade', 'Análise Combinatória', 'Logaritmos (Propriedades)'
+  ],
+  'Ciências da Natureza': [
+    'Ecologia e Impactos Ambientais', 'Citologia (Células e Organelas)', 'Genética (Leis de Mendel)',
+    'Fisiologia Humana (Sistemas)', 'Leis de Newton (Dinâmica)', 'Termologia e Calorimetria',
+    'Ondulatória e Acústica', 'Eletrodinâmica (Circuitos e Resistores)', 'Estequiometria',
+    'Ligações Químicas e Polaridade', 'Separação de Misturas', 'Química Orgânica (Reações)'
+  ],
+  'Linguagens': [
+    'Interpretação de Texto Avançada', 'Funções da Linguagem', 'Figuras de Linguagem',
+    'Variação Linguística', 'Gêneros Textuais', 'Modernismo no Brasil (1ª, 2ª e 3ª fases)', 
+    'Romantismo e Realismo', 'Arte Contemporânea e Vanguardas', 'Intertextualidade e Metalinguagem',
+    'Coesão e Coerência Textual', 'Linguagem Corporal e Esportes', 'Impacto das Tecnologias na Comunicação'
+  ],
+  'Ciências Humanas': [
+    'Era Vargas', 'Ditadura Militar no Brasil', 'República Oligárquica',
+    'Guerra Fria', 'Revolução Industrial', 'Geopolítica e Conflitos Contemporâneos',
+    'Globalização e Blocos Econômicos', 'Urbanização e Migração', 'Geografia Agrária e Agronegócio',
+    'Filosofia Antiga (Grécia)', 'Filosofia Moderna (Iluminismo e Contratualistas)', 'Sociologia: Cultura e Trabalho'
+  ]
 };
 
 const SUBJECT_ICONS = {
@@ -681,7 +649,7 @@ function renderRecursos() {
           <span class="subject-icon">${SUBJECT_ICONS[materia]}</span>
           <div>
             <div class="subject-name">${materia}</div>
-            <div class="subject-count">${topicos.length} tópicos</div>
+            <div class="subject-count">${topicos.length} grandes tópicos</div>
           </div>
         </div>
         <svg class="subject-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
@@ -695,42 +663,47 @@ function renderRecursos() {
         `).join('')}
       </div>
     `;
-    card.querySelector('.subject-header').addEventListener('click', () => {
-      card.classList.toggle('open');
-    });
+    card.querySelector('.subject-header').addEventListener('click', () => { card.classList.toggle('open'); });
     card.querySelectorAll('.btn-ia-topic').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        learnTopic(btn.dataset.materia, btn.dataset.topico);
-      });
+      btn.addEventListener('click', (e) => { e.stopPropagation(); learnTopic(btn.dataset.materia, btn.dataset.topico); });
     });
     container.appendChild(card);
   });
-  const openCard = container.querySelector('.subject-card.open');
-  if (openCard) openCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
   focusMateria = null;
 }
 
-/* ===================== MODO FOCO (POMODORO) ===================== */
-const pomodoro = { focusSecs: 25 * 60, restSecs: 5 * 60, remaining: 25 * 60, mode: 'focus', running: false, timer: null };
+/* ===================== CRONÔMETRO HÍBRIDO ===================== */
+const pomodoro = { focusSecs: 25 * 60, restSecs: 5 * 60, remaining: 25 * 60, mode: 'focus', running: false, timer: null, isSimulado: false };
 
 function formatTime(s) {
-  const m = Math.floor(s / 60).toString().padStart(2, '0');
+  const h = Math.floor(s / 3600);
+  const m = Math.floor((s % 3600) / 60).toString().padStart(2, '0');
   const sec = (s % 60).toString().padStart(2, '0');
-  return `${m}:${sec}`;
+  return h > 0 ? `${h}:${m}:${sec}` : `${m}:${sec}`;
 }
 
 function renderPomodoro() {
   document.getElementById('pomodoroBarTime').textContent = formatTime(pomodoro.remaining);
-  document.getElementById('pomodoroBarMode').textContent = pomodoro.mode === 'focus' ? 'Foco' : 'Descanso';
-  document.getElementById('pomodoroBarStart').textContent = pomodoro.running ? 'Pausar' : 'Iniciar';
+  if (pomodoro.isSimulado) {
+    document.getElementById('pomodoroBarMode').textContent = 'Simulado ENEM';
+    document.getElementById('pomodoroBarStart').textContent = pomodoro.running ? 'Pausar' : 'Continuar';
+  } else {
+    document.getElementById('pomodoroBarMode').textContent = pomodoro.mode === 'focus' ? 'Foco' : 'Descanso';
+    document.getElementById('pomodoroBarStart').textContent = pomodoro.running ? 'Pausar' : 'Iniciar';
+  }
 }
 
 function tickPomodoro() {
   pomodoro.remaining--;
   if (pomodoro.remaining <= 0) {
-    pomodoro.mode = pomodoro.mode === 'focus' ? 'rest' : 'focus';
-    pomodoro.remaining = pomodoro.mode === 'focus' ? pomodoro.focusSecs : pomodoro.restSecs;
+    if (pomodoro.isSimulado) {
+      clearInterval(pomodoro.timer);
+      pomodoro.running = false;
+      alert("Tempo esgotado! Canetas para baixo!");
+    } else {
+      pomodoro.mode = pomodoro.mode === 'focus' ? 'rest' : 'focus';
+      pomodoro.remaining = pomodoro.mode === 'focus' ? pomodoro.focusSecs : pomodoro.restSecs;
+    }
   }
   renderPomodoro();
 }
@@ -744,8 +717,14 @@ document.getElementById('pomodoroBarStart').addEventListener('click', () => {
 document.getElementById('pomodoroBarReset').addEventListener('click', () => {
   clearInterval(pomodoro.timer);
   pomodoro.running = false;
-  pomodoro.mode = 'focus';
-  pomodoro.remaining = pomodoro.focusSecs;
+  if (pomodoro.isSimulado) {
+     alert("Você não pode reiniciar o relógio no meio do Simulado!"); 
+     pomodoro.running = true;
+     pomodoro.timer = setInterval(tickPomodoro, 1000);
+  } else {
+    pomodoro.mode = 'focus';
+    pomodoro.remaining = pomodoro.focusSecs;
+  }
   renderPomodoro();
 });
 
