@@ -17,7 +17,7 @@
   <header class="topbar">
     <div class="topbar-brand">
       <span class="brand-mark">T</span>
-      <span class="brand-name">Projeto Tiago Sanfer</span>
+      <span class="brand-name">Projeto Thiago Sanfer</span>
     </div>
     <div class="topbar-actions">
       <button id="themeToggle" class="icon-btn" aria-label="Alternar tema" title="Alternar tema">
@@ -30,7 +30,7 @@
     </div>
   </header>
 
-  <!-- ===== POMODORO BAR (fixa em Questões e Redação) ===== -->
+  <!-- ===== POMODORO / TIMER BAR ===== -->
   <div id="pomodoroBar" class="pomodoro-bar">
     <div class="pomodoro-bar-info">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
@@ -54,20 +54,21 @@
         <div class="card card-hero">
           <h2 class="hero-title">O que vamos estudar hoje?</h2>
 
-          <p class="chip-group-label">Disciplina</p>
-          <div class="chip-group" id="chipsDisciplina">
-            <button class="chip active" data-value="Matemática">Matemática</button>
-            <button class="chip" data-value="Ciências da Natureza">Natureza</button>
-            <button class="chip" data-value="Linguagens">Linguagens</button>
-            <button class="chip" data-value="Ciências Humanas">Humanas</button>
+          <div id="wrapperDisciplina">
+            <p class="chip-group-label">Disciplina</p>
+            <div class="chip-group" id="chipsDisciplina">
+              <button class="chip active" data-value="Matemática">Matemática</button>
+              <button class="chip" data-value="Ciências da Natureza">Natureza</button>
+              <button class="chip" data-value="Linguagens">Linguagens</button>
+              <button class="chip" data-value="Ciências Humanas">Humanas</button>
+            </div>
           </div>
 
           <p class="chip-group-label">Tipo</p>
           <div class="chip-group" id="chipsTipo">
             <button class="chip active" data-value="teoria">Teoria</button>
             <button class="chip" data-value="exercicio">Exercícios</button>
-            <button class="chip" data-value="revisao">Revisão</button>
-            <button class="chip" data-value="simulado">Simulado</button>
+            <button class="chip" data-value="simulado">Simulado ENEM</button>
           </div>
 
           <button id="btnComecar" class="btn btn-primary btn-block">Começar agora</button>
@@ -136,7 +137,6 @@
           <h2 id="questoesTitle">Questões</h2>
           <button id="btnErrosView" class="btn btn-ghost btn-sm">Caderno de erros</button>
         </div>
-
         <div id="questaoArea"></div>
       </div>
     </section>
@@ -228,7 +228,6 @@
       <select id="blocoTipo">
         <option value="teoria">Teoria</option>
         <option value="exercicio">Exercício</option>
-        <option value="revisao">Revisão</option>
         <option value="simulado">Simulado</option>
         <option value="redacao">Redação</option>
       </select>
@@ -237,6 +236,27 @@
       <label for="blocoHora">Horário</label>
       <input type="time" id="blocoHora" value="19:00">
       <button id="saveBloco" class="btn btn-primary btn-block">Adicionar ao cronograma</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL: ESCOLHA DO SIMULADO ===== -->
+<div id="modalSimulado" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Configurar Simulado</h3>
+      <button class="icon-btn icon-btn-sm modal-close" data-close="modalSimulado">✕</button>
+    </div>
+    <div class="modal-body">
+      <p class="hint" style="margin-bottom: 20px;">Escolha o formato da prova para iniciar o cronômetro oficial do ENEM.</p>
+      <button class="btn btn-outline btn-block" id="btnSimuladoDia1" style="margin-bottom: 12px; display: flex; flex-direction: column; align-items: flex-start; padding: 16px;">
+        <strong style="font-size: 16px; margin-bottom: 4px;">Dia 1 (5h 30m)</strong>
+        <span style="font-size: 13px; font-weight: 400; color: var(--text-muted);">Linguagens, Humanas e Redação</span>
+      </button>
+      <button class="btn btn-outline btn-block" id="btnSimuladoDia2" style="display: flex; flex-direction: column; align-items: flex-start; padding: 16px;">
+        <strong style="font-size: 16px; margin-bottom: 4px;">Dia 2 (5h 00m)</strong>
+        <span style="font-size: 13px; font-weight: 400; color: var(--text-muted);">Matemática e Ciências da Natureza</span>
+      </button>
     </div>
   </div>
 </div>
