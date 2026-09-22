@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-<title>Rumo — Plano de Estudos ENEM</title>
+<title>Projeto Thiago Sanfer</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -16,8 +16,8 @@
   <!-- ===== HEADER ===== -->
   <header class="topbar">
     <div class="topbar-brand">
-      <span class="brand-mark">R</span>
-      <span class="brand-name">Rumo</span>
+      <span class="brand-mark">T</span>
+      <span class="brand-name">Projeto Thiago Sanfer</span>
     </div>
     <div class="topbar-actions">
       <button id="themeToggle" class="icon-btn" aria-label="Alternar tema" title="Alternar tema">
@@ -30,6 +30,19 @@
     </div>
   </header>
 
+  <!-- ===== POMODORO BAR (fixa em Questões e Redação) ===== -->
+  <div id="pomodoroBar" class="pomodoro-bar">
+    <div class="pomodoro-bar-info">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+      <span id="pomodoroBarMode">Foco</span>
+      <strong id="pomodoroBarTime">25:00</strong>
+    </div>
+    <div class="pomodoro-bar-actions">
+      <button id="pomodoroBarStart" class="btn btn-primary btn-xs">Iniciar</button>
+      <button id="pomodoroBarReset" class="btn btn-ghost btn-xs">Reiniciar</button>
+    </div>
+  </div>
+
   <!-- ===== MAIN VIEWS ===== -->
   <main class="views">
 
@@ -40,28 +53,23 @@
 
         <div class="card card-hero">
           <h2 class="hero-title">O que vamos estudar hoje?</h2>
-          <div class="field-row">
-            <div class="field">
-              <label for="selDisciplina">Disciplina</label>
-              <select id="selDisciplina">
-                <option>Matemática</option>
-                <option>Linguagens</option>
-                <option>Ciências Humanas</option>
-                <option>Ciências da Natureza</option>
-                <option>Redação</option>
-              </select>
-            </div>
-            <div class="field">
-              <label for="selTipo">Tipo</label>
-              <select id="selTipo">
-                <option value="teoria">Teoria</option>
-                <option value="exercicio">Exercício</option>
-                <option value="revisao">Revisão</option>
-                <option value="simulado">Simulado</option>
-                <option value="redacao">Redação</option>
-              </select>
-            </div>
+
+          <p class="chip-group-label">Disciplina</p>
+          <div class="chip-group" id="chipsDisciplina">
+            <button class="chip active" data-value="Matemática">Matemática</button>
+            <button class="chip" data-value="Ciências da Natureza">Natureza</button>
+            <button class="chip" data-value="Linguagens">Linguagens</button>
+            <button class="chip" data-value="Ciências Humanas">Humanas</button>
           </div>
+
+          <p class="chip-group-label">Tipo</p>
+          <div class="chip-group" id="chipsTipo">
+            <button class="chip active" data-value="teoria">Teoria</button>
+            <button class="chip" data-value="exercicio">Exercícios</button>
+            <button class="chip" data-value="revisao">Revisão</button>
+            <button class="chip" data-value="simulado">Simulado</button>
+          </div>
+
           <button id="btnComecar" class="btn btn-primary btn-block">Começar agora</button>
         </div>
 
@@ -125,7 +133,7 @@
     <section id="view-questoes" class="view">
       <div class="view-inner" id="questoesInner">
         <div class="view-header">
-          <h2>Questões</h2>
+          <h2 id="questoesTitle">Questões</h2>
           <button id="btnErrosView" class="btn btn-ghost btn-sm">Caderno de erros</button>
         </div>
 
@@ -136,7 +144,10 @@
     <!-- ---------- REDAÇÃO ---------- -->
     <section id="view-redacao" class="view">
       <div class="view-inner">
-        <h2>Momento Redação</h2>
+        <div class="view-header">
+          <h2>Momento Redação</h2>
+          <button id="btnGerarTema" class="btn btn-primary btn-sm">🎲 Gerar novo tema</button>
+        </div>
         <div class="tabs" id="redacaoTabs"></div>
         <div id="redacaoContent" class="card"></div>
       </div>
@@ -145,30 +156,13 @@
     <!-- ---------- RECURSOS ---------- -->
     <section id="view-recursos" class="view">
       <div class="view-inner">
-        <h2>Hub de Recursos</h2>
+        <h2>Guia de Estudos IA</h2>
+        <p class="section-subtitle">Os temas que mais caem no ENEM, com mini-aulas geradas pelo Professor IA.</p>
         <div id="recursosList"></div>
       </div>
     </section>
 
   </main>
-
-  <!-- ===== POMODORO WIDGET (floating) ===== -->
-  <div id="pomodoroWidget" class="pomodoro-widget collapsed">
-    <button id="pomodoroToggle" class="pomodoro-fab" aria-label="Modo Foco">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-    </button>
-    <div class="pomodoro-panel">
-      <div class="pomodoro-header">
-        <span id="pomodoroMode">Foco</span>
-        <button id="pomodoroClose" class="icon-btn icon-btn-sm">✕</button>
-      </div>
-      <div class="pomodoro-time" id="pomodoroTime">25:00</div>
-      <div class="pomodoro-controls">
-        <button id="pomodoroStart" class="btn btn-primary btn-sm">Iniciar</button>
-        <button id="pomodoroReset" class="btn btn-ghost btn-sm">Reiniciar</button>
-      </div>
-    </div>
-  </div>
 
   <!-- ===== BOTTOM NAV ===== -->
   <nav class="bottom-nav">
@@ -247,11 +241,11 @@
   </div>
 </div>
 
-<!-- ===== MODAL: EXPLICAÇÃO IA ===== -->
+<!-- ===== MODAL: PROFESSOR IA ===== -->
 <div id="modalIA" class="modal-overlay">
-  <div class="modal">
+  <div class="modal modal-wide">
     <div class="modal-header">
-      <h3>Professor IA</h3>
+      <h3 id="iaModalTitle">Professor IA</h3>
       <button class="icon-btn icon-btn-sm modal-close" data-close="modalIA">✕</button>
     </div>
     <div class="modal-body">
