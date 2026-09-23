@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-<title>Projeto Tiago Sanfer</title>
+<title>Projeto Thiago Sanfer</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -20,11 +20,11 @@
       <span class="brand-name">Projeto Thiago Sanfer</span>
     </div>
     <div class="topbar-actions">
-      <button id="themeToggle" class="icon-btn" aria-label="Alternar tema" title="Alternar tema">
+      <button id="themeToggle" class="icon-btn" aria-label="Alternar tema">
         <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
         <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z"/></svg>
       </button>
-      <button id="openSettings" class="icon-btn" aria-label="Configurações" title="Configurações">
+      <button id="openSettings" class="icon-btn" aria-label="Configurações">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06A1.65 1.65 0 004.6 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06A1.65 1.65 0 009 4.6a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
       </button>
     </div>
@@ -40,20 +40,20 @@
     <div class="pomodoro-bar-actions">
       <button id="pomodoroBarStart" class="btn btn-primary btn-xs">Iniciar</button>
       <button id="pomodoroBarReset" class="btn btn-ghost btn-xs">Reiniciar</button>
+      <button id="btnFinalizarSimulado" class="btn btn-warning btn-xs" style="display:none; background:var(--color-warning); color:#fff; border:none; border-radius:8px; padding:6px 12px; font-weight:700; cursor:pointer;">Entregar Prova</button>
     </div>
   </div>
 
   <!-- ===== MAIN VIEWS ===== -->
   <main class="views">
 
-    <!-- ---------- DASHBOARD ---------- -->
+    <!-- DASHBOARD -->
     <section id="view-dashboard" class="view active">
       <div class="view-inner">
         <p class="greeting" id="greetingText">Bora estudar?</p>
 
         <div class="card card-hero">
           <h2 class="hero-title">O que vamos estudar hoje?</h2>
-
           <div id="wrapperDisciplina">
             <p class="chip-group-label">Disciplina</p>
             <div class="chip-group" id="chipsDisciplina">
@@ -63,14 +63,12 @@
               <button class="chip" data-value="Ciências Humanas">Humanas</button>
             </div>
           </div>
-
           <p class="chip-group-label">Tipo</p>
           <div class="chip-group" id="chipsTipo">
             <button class="chip active" data-value="teoria">Teoria</button>
             <button class="chip" data-value="exercicio">Exercícios</button>
             <button class="chip" data-value="simulado">Simulado ENEM</button>
           </div>
-
           <button id="btnComecar" class="btn btn-primary btn-block">Começar agora</button>
         </div>
 
@@ -83,7 +81,7 @@
         </button>
 
         <div class="card">
-          <h3 class="card-title">Seu progresso</h3>
+          <h3 class="card-title">Seu progresso global</h3>
           <div class="progress-row">
             <div class="progress-ring-wrap">
               <svg viewBox="0 0 100 100" class="progress-ring">
@@ -92,25 +90,20 @@
               </svg>
               <div class="progress-ring-label">
                 <strong id="pctAcerto">0%</strong>
-                <span>acerto</span>
+                <span>acertos</span>
               </div>
             </div>
             <div class="progress-stats">
               <div class="stat"><span class="stat-dot dot-hit"></span> <span id="statAcertos">0</span> acertos</div>
               <div class="stat"><span class="stat-dot dot-miss"></span> <span id="statErros">0</span> erros</div>
-              <div class="stat"><span class="stat-dot dot-total"></span> <span id="statTotal">0</span> respondidas</div>
+              <div class="stat"><span class="stat-dot dot-total"></span> <span id="statTotal">0</span> resolvidas</div>
             </div>
           </div>
-        </div>
-
-        <div class="card">
-          <h3 class="card-title">Tarefas de hoje</h3>
-          <div id="todayTasks" class="today-list"></div>
         </div>
       </div>
     </section>
 
-    <!-- ---------- CALENDÁRIO ---------- -->
+    <!-- CALENDÁRIO -->
     <section id="view-calendario" class="view">
       <div class="view-inner">
         <div class="view-header">
@@ -130,7 +123,7 @@
       </div>
     </section>
 
-    <!-- ---------- QUESTÕES ---------- -->
+    <!-- QUESTÕES -->
     <section id="view-questoes" class="view">
       <div class="view-inner" id="questoesInner">
         <div class="view-header">
@@ -141,7 +134,7 @@
       </div>
     </section>
 
-    <!-- ---------- REDAÇÃO ---------- -->
+    <!-- REDAÇÃO -->
     <section id="view-redacao" class="view">
       <div class="view-inner">
         <div class="view-header">
@@ -153,11 +146,11 @@
       </div>
     </section>
 
-    <!-- ---------- RECURSOS ---------- -->
+    <!-- RECURSOS -->
     <section id="view-recursos" class="view">
       <div class="view-inner">
         <h2>Guia de Estudos IA</h2>
-        <p class="section-subtitle">Os temas que mais caem no ENEM, com mini-aulas geradas pelo Professor IA.</p>
+        <p class="section-subtitle">Os temas essenciais do ENEM, com mini-aulas geradas pelo Professor IA.</p>
         <div id="recursosList"></div>
       </div>
     </section>
@@ -166,31 +159,18 @@
 
   <!-- ===== BOTTOM NAV ===== -->
   <nav class="bottom-nav">
-    <button class="nav-item active" data-view="dashboard">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>
-      <span>Início</span>
-    </button>
-    <button class="nav-item" data-view="calendario">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>
-      <span>Agenda</span>
-    </button>
-    <button class="nav-item" data-view="questoes">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 115 .5c0 1.5-2.2 1.8-2.5 3.2M12 17h.01"/></svg>
-      <span>Questões</span>
-    </button>
-    <button class="nav-item" data-view="redacao">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z"/></svg>
-      <span>Redação</span>
-    </button>
-    <button class="nav-item" data-view="recursos">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>
-      <span>Recursos</span>
-    </button>
+    <button class="nav-item active" data-view="dashboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg><span>Início</span></button>
+    <button class="nav-item" data-view="calendario"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg><span>Agenda</span></button>
+    <button class="nav-item" data-view="questoes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 115 .5c0 1.5-2.2 1.8-2.5 3.2M12 17h.01"/></svg><span>Questões</span></button>
+    <button class="nav-item" data-view="redacao"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z"/></svg><span>Redação</span></button>
+    <button class="nav-item" data-view="recursos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg><span>Recursos</span></button>
   </nav>
 
 </div>
 
-<!-- ===== MODAL: SETTINGS ===== -->
+<!-- ===== MODALS ===== -->
+
+<!-- Modal: Configurações -->
 <div id="modalSettings" class="modal-overlay">
   <div class="modal">
     <div class="modal-header">
@@ -199,8 +179,8 @@
     </div>
     <div class="modal-body">
       <label for="geminiKeyInput">Chave de API do Google Gemini</label>
-      <input type="password" id="geminiKeyInput" placeholder="Cole sua GEMINI_API_KEY">
-      <p class="hint">Sua chave fica salva apenas no seu navegador (localStorage), nunca é enviada para nenhum servidor além do Google.</p>
+      <input type="password" id="geminiKeyInput" placeholder="Sua GEMINI_API_KEY">
+      <p class="hint">Sua chave fica salva apenas no seu navegador localmente.</p>
       <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener" class="link-inline">Gerar chave gratuita no Google AI Studio ↗</a>
       <button id="saveGeminiKey" class="btn btn-primary btn-block">Salvar chave</button>
       <p class="save-confirm" id="keySaveConfirm" hidden>Chave salva!</p>
@@ -208,7 +188,7 @@
   </div>
 </div>
 
-<!-- ===== MODAL: ADICIONAR BLOCO ===== -->
+<!-- Modal: Adicionar Bloco -->
 <div id="modalBloco" class="modal-overlay">
   <div class="modal">
     <div class="modal-header">
@@ -216,31 +196,22 @@
       <button class="icon-btn icon-btn-sm modal-close" data-close="modalBloco">✕</button>
     </div>
     <div class="modal-body">
-      <label for="blocoDisciplina">Disciplina</label>
+      <label>Disciplina</label>
       <select id="blocoDisciplina">
-        <option>Matemática</option>
-        <option>Linguagens</option>
-        <option>Ciências Humanas</option>
-        <option>Ciências da Natureza</option>
-        <option>Redação</option>
+        <option>Matemática</option><option>Linguagens</option><option>Ciências Humanas</option><option>Ciências da Natureza</option><option>Redação</option>
       </select>
-      <label for="blocoTipo">Tipo</label>
+      <label>Tipo</label>
       <select id="blocoTipo">
-        <option value="teoria">Teoria</option>
-        <option value="exercicio">Exercício</option>
-        <option value="simulado">Simulado</option>
-        <option value="redacao">Redação</option>
+        <option value="teoria">Teoria</option><option value="exercicio">Exercício</option><option value="simulado">Simulado</option><option value="redacao">Redação</option>
       </select>
-      <label for="blocoData">Data</label>
-      <input type="date" id="blocoData">
-      <label for="blocoHora">Horário</label>
-      <input type="time" id="blocoHora" value="19:00">
-      <button id="saveBloco" class="btn btn-primary btn-block">Adicionar ao cronograma</button>
+      <label>Data</label><input type="date" id="blocoData">
+      <label>Horário</label><input type="time" id="blocoHora" value="19:00">
+      <button id="saveBloco" class="btn btn-primary btn-block">Adicionar</button>
     </div>
   </div>
 </div>
 
-<!-- ===== MODAL: ESCOLHA DO SIMULADO ===== -->
+<!-- Modal: Escolha do Simulado -->
 <div id="modalSimulado" class="modal-overlay">
   <div class="modal">
     <div class="modal-header">
@@ -248,10 +219,10 @@
       <button class="icon-btn icon-btn-sm modal-close" data-close="modalSimulado">✕</button>
     </div>
     <div class="modal-body">
-      <p class="hint" style="margin-bottom: 20px;">Escolha o formato da prova para iniciar o cronômetro oficial do ENEM.</p>
+      <p class="hint" style="margin-bottom: 20px;">O simulado usará cálculo TRI simulado com base na coerência dos seus acertos.</p>
       <button class="btn btn-outline btn-block" id="btnSimuladoDia1" style="margin-bottom: 12px; display: flex; flex-direction: column; align-items: flex-start; padding: 16px;">
         <strong style="font-size: 16px; margin-bottom: 4px;">Dia 1 (5h 30m)</strong>
-        <span style="font-size: 13px; font-weight: 400; color: var(--text-muted);">Linguagens, Humanas e Redação</span>
+        <span style="font-size: 13px; font-weight: 400; color: var(--text-muted);">Linguagens e Humanas</span>
       </button>
       <button class="btn btn-outline btn-block" id="btnSimuladoDia2" style="display: flex; flex-direction: column; align-items: flex-start; padding: 16px;">
         <strong style="font-size: 16px; margin-bottom: 4px;">Dia 2 (5h 00m)</strong>
@@ -261,7 +232,26 @@
   </div>
 </div>
 
-<!-- ===== MODAL: PROFESSOR IA ===== -->
+<!-- Modal: Resultado Simulado (Cálculo TRI) -->
+<div id="modalResultadoSimulado" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Resultado do Simulado</h3>
+      <button class="icon-btn icon-btn-sm modal-close" data-close="modalResultadoSimulado">✕</button>
+    </div>
+    <div class="modal-body" style="text-align: center;">
+      <p class="hint">A sua nota foi calculada usando nosso Algoritmo TRI de coerência.</p>
+      <div style="font-size: 52px; font-weight: 800; color: var(--color-primary-600); margin: 20px 0;" id="notaTRI">0</div>
+      <div style="display: flex; justify-content: space-around; margin-bottom: 24px; font-size: 15px;">
+        <div><strong style="color: var(--color-success);" id="triAcertos">0</strong> Acertos</div>
+        <div><strong style="color: var(--color-danger);" id="triErros">0</strong> Erros</div>
+      </div>
+      <button class="btn btn-primary btn-block modal-close" data-close="modalResultadoSimulado">Voltar aos Estudos</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Professor IA -->
 <div id="modalIA" class="modal-overlay">
   <div class="modal modal-wide">
     <div class="modal-header">
@@ -274,6 +264,8 @@
   </div>
 </div>
 
+<!-- Scripts na ordem correta -->
+<script src="data.js"></script>
 <script src="app.js"></script>
 </body>
 </html>
