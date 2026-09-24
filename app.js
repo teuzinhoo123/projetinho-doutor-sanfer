@@ -9,8 +9,8 @@ const store = {
 
 const KEYS = { theme: 'rumo_theme', schedule: 'rumo_schedule', stats: 'rumo_stats', errors: 'rumo_errors', geminiKey: 'rumo_gemini_key', lastSession: 'rumo_last_session' };
 
-// MODELO ATUALIZADO PARA EVITAR ERRO v1beta (agora usa o endpoint universal)
-const GEMINI_MODEL = 'gemini-1.5-flash-latest';
+// MODELO ATUALIZADO PARA A VERSÃO MAIS ESTÁVEL E UNIVERSAL
+const GEMINI_MODEL = 'gemini-pro';
 
 /* ===================== THEME ===================== */
 function initTheme() {
@@ -412,7 +412,6 @@ async function callGemini(prompt) {
   const key = store.get(KEYS.geminiKey, '');
   if (!key) throw new Error('SEM_CHAVE');
   
-  // Endpoint atualizado e dinâmico para evitar problemas de versão depreciada
   const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`, {
     method: 'POST', headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key },
     body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
@@ -441,7 +440,7 @@ async function explainWithAI(q, chosenLetter) {
       content.innerHTML = parseMarkdownToHTML(await callGemini(prompt)); 
   } catch (err) { 
       if (err.message === "MODELO_NAO_ENCONTRADO") {
-          content.innerHTML = `<p>Ocorreu um erro com a versão da API. O Google atualizou os modelos. Por favor, avise o desenvolvedor para atualizar o GEMINI_MODEL no código.</p>`;
+          content.innerHTML = `<p>A versão da API está incorreta. Verifique se o modelo está configurado corretamente no código.</p>`;
       } else {
           content.innerHTML = `<p>Erro: ${err.message}</p>`; 
       }
@@ -504,7 +503,7 @@ function renderRecursos() {
         </div>
         <svg class="subject-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
       </div>
-      <div class="subject-body">${topicos.map(t => `<div class="topic-row"><span>${t}</span><button class="btn btn-xs btn-outline btn-ia-topic" data-materia="${materia}" data-topico="${t}">Aprender</button></div>`).join('')}</div>`;
+      <div class="subject-body">${topicos.map(t => `<div class="topic-row"><span class="topic-name">${t}</span><button class="btn btn-xs btn-outline btn-ia-topic" data-materia="${materia}" data-topico="${t}">Aprender</button></div>`).join('')}</div>`;
     card.querySelector('.subject-header').addEventListener('click', () => card.classList.toggle('open'));
     card.querySelectorAll('.btn-ia-topic').forEach(btn => btn.addEventListener('click', e => { e.stopPropagation(); learnTopic(btn.dataset.materia, btn.dataset.topico); }));
     container.appendChild(card);
