@@ -664,29 +664,41 @@ const SUBJECT_ICONS = {
 };
 
 function renderRecursos() {
-  const container = document.getElementById('recursosList'); container.innerHTML = '';
-  if(typeof STUDY_TOPICS === 'undefined') return;
+  const container = document.getElementById('recursosList'); 
+  if (!container) return;
+  container.innerHTML = '';
+  
+  // Proteção caso o data.js não tenha carregado
+  if (typeof STUDY_TOPICS === 'undefined') return;
 
   Object.entries(STUDY_TOPICS).forEach(([materia, topicos]) => {
-    const card = document.createElement('div'); card.className = 'subject-card';
+    const card = document.createElement('div'); 
+    card.className = 'subject-card';
     card.innerHTML = `<div class="subject-header">
         <div class="subject-header-left">
           <span class="subject-icon">${SUBJECT_ICONS[materia] || SUBJECT_ICONS['Linguagens']}</span>
-          <div><div class="subject-name">${materia}</div><div class="subject-count">${topicos.length} temas frequentes</div></div>
+          <div>
+            <div class="subject-name">${materia}</div>
+            <div class="subject-count">${topicos.length} resumos essenciais</div>
+          </div>
         </div>
         <svg class="subject-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
       </div>
       <div class="subject-body">
         ${topicos.map(t => `
-          <div class="topic-row" style="flex-direction: column; align-items: flex-start;">
-            <strong class="topic-name" style="margin-bottom: 8px; color: var(--color-primary-700);">${t.nome}</strong>
-            <p style="font-size: 13.5px; color: var(--text-muted); line-height: 1.5; margin-bottom: 8px;">${parseMarkdownToHTML(t.teoria)}</p>
+          <div class="topic-row" style="flex-direction: column; align-items: flex-start; gap: 12px; padding: 20px;">
+            <strong class="topic-name" style="color: var(--color-primary-700); font-size: 16px;">${t.nome}</strong>
+            <div style="font-size: 14px; color: var(--text-muted); line-height: 1.6;">
+              ${parseMarkdownToHTML(t.teoria)}
+            </div>
+            ${t.pdf ? `<a href="${t.pdf}" target="_blank" class="btn btn-outline btn-sm" style="width: 100%; text-align: center; display: block; border-color: var(--color-primary-400); color: var(--color-primary-600); margin-top: 8px;">📖 Abrir Apostila Completa</a>` : ''}
           </div>
         `).join('')}
       </div>`;
+      
+    // Adiciona o evento de clique para abrir/fechar o acordeão
     card.querySelector('.subject-header').addEventListener('click', () => card.classList.toggle('open'));
     container.appendChild(card);
   });
 }
-
 renderDashboard(); renderPomodoro(); renderRecursos();
