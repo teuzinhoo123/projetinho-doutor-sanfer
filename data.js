@@ -1,31 +1,95 @@
 /* ===================== BANCO DE RECURSOS E TÓPICOS ===================== */
 const STUDY_TOPICS = {
-    'Matemática': [
-      'Matemática Financeira e Porcentagem', 'Razão e Proporção', 'Regra de Três (Simples e Composta)',
-      'Leitura de Gráficos e Tabelas', 'Estatística (Média, Moda e Mediana)', 'Funções do 1º e 2º grau', 
-      'Geometria Plana (Áreas e Perímetros)', 'Geometria Espacial (Cálculo de Volume)', 'Trigonometria Básica', 
-      'Probabilidade', 'Análise Combinatória', 'Logaritmos (Propriedades)'
-    ],
-    'Ciências da Natureza': [
-      'Ecologia e Impactos Ambientais', 'Citologia (Células e Organelas)', 'Genética (Leis de Mendel)',
-      'Fisiologia Humana (Sistemas)', 'Leis de Newton (Dinâmica)', 'Termologia e Calorimetria',
-      'Ondulatória e Acústica', 'Eletrodinâmica (Circuitos e Resistores)', 'Estequiometria',
-      'Ligações Químicas e Polaridade', 'Separação de Misturas', 'Química Orgânica (Reações)'
-    ],
-    'Linguagens': [
-      'Interpretação de Texto Avançada', 'Funções da Linguagem', 'Figuras de Linguagem',
-      'Variação Linguística', 'Gêneros Textuais', 'Modernismo no Brasil (1ª, 2ª e 3ª fases)', 
-      'Romantismo e Realismo', 'Arte Contemporânea e Vanguardas', 'Intertextualidade e Metalinguagem',
-      'Coesão e Coerência Textual', 'Linguagem Corporal e Esportes', 'Impacto das Tecnologias na Comunicação'
-    ],
-    'Ciências Humanas': [
-      'Era Vargas', 'Ditadura Militar no Brasil', 'República Oligárquica',
-      'Guerra Fria', 'Revolução Industrial', 'Geopolítica e Conflitos Contemporâneos',
-      'Globalização e Blocos Econômicos', 'Urbanização e Migração', 'Geografia Agrária e Agronegócio',
-      'Filosofia Antiga (Grécia)', 'Filosofia Moderna (Iluminismo e Contratualistas)', 'Sociologia: Cultura e Trabalho'
-    ]
-  };
+  'Matemática': [
+    { 
+      nome: 'Razão, Proporção e Regra de Três (22%)', 
+      teoria: '**O Pulo do Gato:** Antes de montar a conta, pergunte: se um aumenta, o outro aumenta ou diminui? Aumenta junto = direta. Um sobe e o outro desce = inversa (inverta a fração antes de multiplicar).\n\n**Porcentagem:** Aumentar 20% é multiplicar por 1,20; dar desconto de 20% é multiplicar por 0,80. Percentuais sucessivos se multiplicam, jamais se somam.',
+      pdf: 'guia-definitivo-matematica.pdf#page=3'
+    },
+    { 
+      nome: 'Geometria Espacial e Sólidos (14,6%)', 
+      teoria: '**O Pulo do Gato:** Pergunte se a questão quer o que enche (volume) ou o que reveste (área). E se o resultado sair em litros: $1 m³ = 1.000 L$.\n\n**Decore:** Volume de Prisma/Cilindro = Área da Base × Altura. Pirâmide e Cone = (Área da Base × Altura) / 3.',
+      pdf: 'guia-definitivo-matematica.pdf#page=6'
+    },
+    { 
+      nome: 'Estatística (14,1%)', 
+      teoria: '**O Pulo do Gato:** Tem valor muito fora da curva? A mediana representa melhor. A média é sensível a valores extremos e "mente".\n\n**Gráficos:** Leia o eixo antes de tudo. Eixo que não começa no zero exagera visualmente diferenças pequenas.',
+      pdf: 'guia-definitivo-matematica.pdf#page=8'
+    }
+  ],
   
+  'Linguagens': [
+    { 
+      nome: 'Variação Linguística (30,4%)', 
+      teoria: '**O Pulo do Gato:** Se a alternativa diz que a variedade é errada ou pobre, descarte. A resposta certa fala em adequação ao contexto ou em preconceito social.\n\n**Decore:** Não existe erro, existe inadequação. Norma-padrão é apenas a variedade de prestígio.',
+      pdf: 'guia-definitivo-portugues.pdf#page=3'
+    },
+    { 
+      nome: 'Gêneros Textuais (24,9%)', 
+      teoria: '**O Pulo do Gato:** Faça três perguntas ao texto: quem escreveu, para quem e para quê? Respondidas as três, o gênero e a finalidade aparecem sozinhos.\n\n**Decore:** Gênero é a prática social (carta, receita, bula, meme). Suporte é onde circula. Finalidade é o que busca (informar, convencer, instruir).',
+      pdf: 'guia-definitivo-portugues.pdf#page=7'
+    },
+    { 
+      nome: 'Interpretação e Compreensão (21,3%)', 
+      teoria: '**O Pulo do Gato:** Antes de olhar as alternativas, resuma o texto em uma frase. Elimine tudo que não conversa com essa frase.\n\n**Decore:** Inferência é a conclusão autorizada pelo texto, e não a opinião do leitor. Intertextualidade: Paráfrase reafirma, Paródia subverte.',
+      pdf: 'guia-definitivo-portugues.pdf#page=10'
+    }
+  ],
+
+  'Ciências da Natureza': [
+    { 
+      nome: 'Biologia: Impactos Ambientais (15,1%)', 
+      teoria: '**O Pulo do Gato:** Escreva a cadeia antes de marcar: causa $\\rightarrow$ mecanismo $\\rightarrow$ consequência. A alternativa errada quase sempre acerta as pontas e erra o meio.\n\n**Decore:** Efeito estufa é natural, o problema é a sua intensificação. Camada de ozônio é destruída por CFCs. Magnificação trófica: toxinas acumulam no topo da cadeia alimentar.',
+      pdf: 'guia-definitivo-biologia.pdf#page=5'
+    },
+    { 
+      nome: 'Química: Química Orgânica (21,8%)', 
+      teoria: '**O Pulo do Gato:** O Carbono é tetravalente (faz 4 ligações). Procure o grupo funcional antes de qualquer coisa: Álcool (OH em carbono saturado), Fenol (OH direto no anel), Aldeído (CHO na ponta), Cetona (CO no meio), Ácido Carboxílico (COOH).\n\n**Decore Reações:** Adição (abre dupla), Substituição (troca átomo), Esterificação (Ácido + Álcool $\\rightarrow$ Éster + Água).',
+      pdf: 'guia-definitivo-quimica.pdf#page=3'
+    },
+    { 
+      nome: 'Física: Eletricidade (20,3%)', 
+      teoria: '**O Pulo do Gato:** Série segura a corrente, paralelo partilha a tensão. Uma casa é ligada em paralelo (todo aparelho recebe a tensão cheia). Se fosse em série, apagar uma lâmpada apagaria tudo.\n\n**Decore:** $U = R \\cdot i$ (Lei de Ohm). Potência: $P = U \\cdot i$. Consumo: $E = P \\cdot t$ (P em kW, t em horas para obter kWh).',
+      pdf: 'guia-definitivo-fisica.pdf#page=3'
+    }
+  ],
+
+  'Ciências Humanas': [
+    { 
+      nome: 'História: Brasil República (15,3%)', 
+      teoria: '**O Pulo do Gato:** Pergunte quem vota e como. O voto aberto, restrito e fraudado explica o coronelismo, a política dos governadores e a estabilidade das oligarquias.\n\n**Decore:** A Proclamação (1889) foi um golpe militar sem participação popular. A Era Vargas trouxe direitos trabalhistas (CLT) atrelados a controle político e censura (DIP).',
+      pdf: 'guia-definitivo-historia.pdf#page=13'
+    },
+    { 
+      nome: 'Geografia: Meio Ambiente (13,7%)', 
+      teoria: '**O Pulo do Gato:** Escala é fração! $1/100$ é maior que $1/1.000.000$. Denominador grande significa escala pequena (pouco detalhe).\n\n**Meio Ambiente:** Todo problema ambiental esconde uma disputa por território. O desmatamento é uma cadeia: grilagem $\\rightarrow$ madeira $\\rightarrow$ pecuária $\\rightarrow$ lavoura.',
+      pdf: 'Apostila_Geografia_ENEM_lib.pdf#page=17'
+    },
+    { 
+      nome: 'Sociologia: Cultura e Desigualdade (33,6%)', 
+      teoria: '**O Pulo do Gato:** Etnocentrismo = julgar o outro pelos próprios valores. Relativismo = compreender a prática na lógica de quem a pratica. A alternativa que julga a cultura como "atrasada" está sempre errada.\n\n**Desigualdade:** Identifique o cruzamento CRG (Classe, Raça, Gênero). O racismo estrutural é reproduzido por instituições e resultados, independente da intenção.',
+      pdf: 'guia-definitivo-sociologia.pdf#page=3'
+    },
+    {
+      nome: 'Filosofia: Teoria do Conhecimento (49,5%)',
+      teoria: '**O Pulo do Gato:** Procure de onde o autor tira a justificativa: da razão ou dos sentidos? Racionalismo (Descartes) desconfia dos sentidos. Empirismo (Locke, Hume, Bacon) diz que a mente é tábula rasa.\n\n**Kant:** Sintetiza os dois: a experiência dá o conteúdo e a razão dá as formas. "Esclarecimento" é sair da menoridade e pensar por si mesmo.',
+      pdf: 'guia-definitivo-filosofia.pdf#page=3'
+    }
+  ],
+
+  'Redação': [
+    { 
+      nome: 'Estrutura e Competência 2 (Tema e Repertório)', 
+      teoria: '**O Pulo do Gato:** O tema tem peças. Ex: "Desafios para a valorização da herança africana no Brasil". Falta uma peça, o texto tangencia.\n\n**Repertório:** Repertório de bolso (genérico) trava a nota. Use referências ligadas à pauta. Ex: O livro "Quarto de Despejo" de Carolina Maria de Jesus serve perfeitamente para exclusão e racismo estrutural.',
+      pdf: 'Apostila_Redacao_ENEM_lib.pdf#page=2'
+    },
+    { 
+      nome: 'Competência 5 (Proposta de Intervenção)', 
+      teoria: '**O Pulo do Gato:** A proposta exige 5 elementos obrigatórios: Agente, Ação, Meio/Modo, Efeito e Detalhamento.\n\n**Exemplo prático:** O Ministério da Educação (Agente) - órgão responsável pelas políticas de ensino (Detalhamento) - deve criar oficinas culturais (Ação), por meio da destinação de verbas federais às escolas (Meio), a fim de mitigar o apagamento histórico dessas populações (Efeito).',
+      pdf: 'Apostila_Redacao_ENEM_lib.pdf#page=11'
+    }
+  ]
+};
 /* ===================== BANCO DE TEMAS DE REDAÇÃO (ÚLTIMOS 10 ANOS) ===================== */
 const ESSAY_THEMES = [
     { 
