@@ -108,7 +108,10 @@
       <div class="view-inner">
         <div class="view-header">
           <h2>Cronograma</h2>
-          <button id="btnAddBloco" class="btn btn-primary btn-sm">+ Novo bloco</button>
+          <div style="display: flex; gap: 8px;">
+            <button id="btnGerarCronograma30Dias" class="btn btn-warning btn-sm" style="background: var(--color-warning); color: #fff; border: none; font-weight: 700;">⚡ Reta Final</button>
+            <button id="btnAddBloco" class="btn btn-primary btn-sm">+ Bloco</button>
+          </div>
         </div>
         <div class="week-nav">
           <button id="weekPrev" class="icon-btn icon-btn-sm">‹</button>
@@ -141,8 +144,25 @@
           <h2>Momento Redação</h2>
           <button id="btnGerarTema" class="btn btn-primary btn-sm">🎲 Gerar novo tema</button>
         </div>
+        
+        <!-- Tema e Textos Motivadores -->
         <div class="tabs" id="redacaoTabs"></div>
-        <div id="redacaoContent" class="card"></div>
+        <div id="redacaoContent" class="card" style="margin-bottom: var(--space-5);"></div>
+
+        <!-- Área de Escrita e Correção IA -->
+        <div class="card">
+          <h3 class="card-title">A tua Redação</h3>
+          <p class="hint">Escreve ou cola o teu texto aqui. O Professor IA irá corrigir com base nas 5 competências do ENEM.</p>
+          <textarea id="textoRedacao" rows="12" placeholder="Começa a escrever o teu texto dissertativo-argumentativo..." style="width: 100%; padding: 16px; border-radius: var(--radius-sm); border: 1px solid var(--border); font-family: var(--font-body); font-size: 15px; resize: vertical; margin-bottom: 16px; background: var(--surface-2); color: var(--text);"></textarea>
+          
+          <button id="btnCorrigirRedacao" class="btn btn-primary btn-block" style="background: var(--color-primary-600); color: #fff;">✨ Corrigir com Professor IA</button>
+          
+          <div id="redacaoFeedback" style="display:none; margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--border);">
+            <h3 style="margin-bottom: 16px;">Gabarito da Correção</h3>
+            <div id="redacaoFeedbackContent" class="ia-content"></div>
+          </div>
+        </div>
+
       </div>
     </section>
 
@@ -150,7 +170,7 @@
     <section id="view-recursos" class="view">
       <div class="view-inner">
         <h2>Guia de Estudos IA</h2>
-        <p class="section-subtitle">Os temas essenciais do ENEM, com mini-aulas geradas pelo Professor IA.</p>
+        <p class="section-subtitle">Os temas essenciais do ENEM, resumidos diretamente das apostilas oficiais.</p>
         <div id="recursosList"></div>
       </div>
     </section>
@@ -163,14 +183,12 @@
     <button class="nav-item" data-view="calendario"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg><span>Agenda</span></button>
     <button class="nav-item" data-view="questoes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 115 .5c0 1.5-2.2 1.8-2.5 3.2M12 17h.01"/></svg><span>Questões</span></button>
     <button class="nav-item" data-view="redacao"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z"/></svg><span>Redação</span></button>
-    <button class="nav-item" data-view="recursos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg><span>Recursos</span></button>
+    <button class="nav-item" data-view="recursos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg><span>Apostilas</span></button>
   </nav>
 
 </div>
 
 <!-- ===== MODALS ===== -->
-
-<!-- Modal: Configurações -->
 <div id="modalSettings" class="modal-overlay">
   <div class="modal">
     <div class="modal-header">
@@ -188,7 +206,6 @@
   </div>
 </div>
 
-<!-- Modal: Adicionar Bloco -->
 <div id="modalBloco" class="modal-overlay">
   <div class="modal">
     <div class="modal-header">
@@ -211,7 +228,6 @@
   </div>
 </div>
 
-<!-- Modal: Escolha do Simulado -->
 <div id="modalSimulado" class="modal-overlay">
   <div class="modal">
     <div class="modal-header">
@@ -219,7 +235,7 @@
       <button class="icon-btn icon-btn-sm modal-close" data-close="modalSimulado">✕</button>
     </div>
     <div class="modal-body">
-      <p class="hint" style="margin-bottom: 20px;">O simulado usará cálculo TRI simulado com base na coerência dos seus acertos.</p>
+      <p class="hint" style="margin-bottom: 20px;">O simulado usará questões da API oficial do ENEM com cronômetro e cálculo TRI simulado.</p>
       <button class="btn btn-outline btn-block" id="btnSimuladoDia1" style="margin-bottom: 12px; display: flex; flex-direction: column; align-items: flex-start; padding: 16px;">
         <strong style="font-size: 16px; margin-bottom: 4px;">Dia 1 (5h 30m)</strong>
         <span style="font-size: 13px; font-weight: 400; color: var(--text-muted);">Linguagens e Humanas</span>
@@ -232,7 +248,6 @@
   </div>
 </div>
 
-<!-- Modal: Resultado Simulado (Cálculo TRI) -->
 <div id="modalResultadoSimulado" class="modal-overlay">
   <div class="modal">
     <div class="modal-header">
@@ -251,7 +266,7 @@
   </div>
 </div>
 
-<!-- Modal: Professor IA -->
+<!-- Modal para Exibir a Resolução Comentada ou Aula do Professor IA -->
 <div id="modalIA" class="modal-overlay">
   <div class="modal modal-wide">
     <div class="modal-header">
@@ -265,6 +280,11 @@
 </div>
 
 <!-- Scripts na ordem correta -->
+<script src="questoes_pt1.js"></script>
+<script src="questoes_pt2.js"></script>
+<script src="questoes_pt3.js"></script>
+<script src="questoes_pt4.js"></script>
+<script src="questoes_pt5.js"></script>
 <script src="data.js"></script>
 <script src="app.js"></script>
 </body>
