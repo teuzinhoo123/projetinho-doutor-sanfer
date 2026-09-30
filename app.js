@@ -359,16 +359,44 @@ let questionQueue = [];
 let currentQuestion = null;
 let activeMateriaFilter = null;
 
-// Reúne todos os arrays de questões carregados dos ficheiros separados (pt1 até pt5)
-function getLocalMockQuestions() {
-  let allLocalQuestions = [];
-  if (typeof MOCK_QUESTIONS !== 'undefined') allLocalQuestions = allLocalQuestions.concat(MOCK_QUESTIONS);
-  if (typeof MOCK_QUESTIONS_PT2 !== 'undefined') allLocalQuestions = allLocalQuestions.concat(MOCK_QUESTIONS_PT2);
-  if (typeof MOCK_QUESTIONS_PT3 !== 'undefined') allLocalQuestions = allLocalQuestions.concat(MOCK_QUESTIONS_PT3);
-  if (typeof MOCK_QUESTIONS_PT4 !== 'undefined') allLocalQuestions = allLocalQuestions.concat(MOCK_QUESTIONS_PT4);
-  if (typeof MOCK_QUESTIONS_PT5 !== 'undefined') allLocalQuestions = allLocalQuestions.concat(MOCK_QUESTIONS_PT5);
-  return allLocalQuestions;
+// Remove marcações "[cite: 13]" que sobraram dos textos das apostilas
+function limparCite(txt) {
+  return typeof txt === 'string' ? txt.replace(/\s*\[cite:[^\]]*\]/g, '') : txt;
 }
+
+// Reúne todos os arrays de questões carregados dos ficheiros separados (pt1 até pt7)
+function getLocalMockQuestions() {
+  const bancos = [
+    typeof MOCK_QUESTIONS !== 'undefined' ? MOCK_QUESTIONS : [],
+    typeof MOCK_QUESTIONS_PT2 !== 'undefined' ? MOCK_QUESTIONS_PT2 : [],
+    typeof MOCK_QUESTIONS_PT3 !== 'undefined' ? MOCK_QUESTIONS_PT3 : [],
+    typeof MOCK_QUESTIONS_PT4 !== 'undefined' ? MOCK_QUESTIONS_PT4 : [],
+    typeof MOCK_QUESTIONS_PT5 !== 'undefined' ? MOCK_QUESTIONS_PT5 : [],
+    typeof MOCK_QUESTIONS_PT6 !== 'undefined' ? MOCK_QUESTIONS_PT6 : [],
+    typeof MOCK_QUESTIONS_PT7 !== 'undefined' ? MOCK_QUESTIONS_PT7 : []
+  ];
+  const vistos = new Set();
+  const todas = [];
+  bancos.flat().forEach(q => {
+    if (!q || vistos.has(q.id)) return; // evita duplicadas por id
+    vistos.add(q.id);
+    todas.push({
+      ...q,
+      enunciado: limparCite(q.enunciado),
+      resolucao: limparCite(q.resolucao),
+      alternativas: (q.alternativas || []).map(a => ({ ...a, texto: limparCite(a.texto) }))
+    });
+  });
+  return todas;
+}
+
+// Normaliza texto (minúsculas, sem acento) para comparar matérias com segurança
+function normMateria(t) {
+  return String(t || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+}
+
+// Histórico para não repetir a mesma questão até esgotar o conjunto filtrado
+let questoesVistas = new Set();
 
 async function loadQuestion(materiaFilter) {
   if (materiaFilter !== undefined) activeMateriaFilter = materiaFilter;
@@ -395,8 +423,9 @@ async function loadQuestion(materiaFilter) {
       pool = getLocalMockQuestions();
       
       if (activeMateriaFilter) {
-        let filtered = pool.filter(q => q.materia.toLowerCase().includes(activeMateriaFilter.toLowerCase().split(' ')[0]));
-        if (filtered.length > 0) pool = filtered;
+        // Comparação exata: "Ciências Humanas" não pode mais puxar "Ciências da Natureza"
+        const alvo = normMateria(activeMateriaFilter);
+        pool = pool.filter(q => normMateria(q.materia) === alvo);
       }
     }
 
@@ -405,7 +434,15 @@ async function loadQuestion(materiaFilter) {
       return;
     }
 
-    currentQuestion = pool[Math.floor(Math.random() * pool.length)];
+    // Sorteia sem repetir enquanto houver questões novas no conjunto atual
+    let naoVistas = pool.filter(q => !questoesVistas.has(q.id));
+    if (naoVistas.length === 0) {
+      pool.forEach(q => questoesVistas.delete(q.id));
+      naoVistas = pool.filter(q => q.id !== (currentQuestion && currentQuestion.id));
+      if (naoVistas.length === 0) naoVistas = pool;
+    }
+    currentQuestion = naoVistas[Math.floor(Math.random() * naoVistas.length)];
+    questoesVistas.add(currentQuestion.id);
     
     if (pomodoro.isSimulado && questionQueue.length > 0) {
       questionQueue = questionQueue.filter(q => q.id !== currentQuestion.id);

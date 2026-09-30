@@ -40,7 +40,7 @@ const MOCK_QUESTIONS_PT4 = [
   },
   {
     id: 'soc-03-01', source: 'Apostila Sociologia ENEM', materia: 'Ciências Humanas', dificuldade: 'media',
-    enunciado: 'Após sete anos da ocupação de um terreno abandonado em Santo André, os condomínios foram inaugurados. O movimento vinha reivindicando o direito ao espaço. A Carta Magna, em seu art. 6º, garante a todos o direito à moradia.<br><br>O texto apresenta uma strategy usada pelo movimento social para[cite: 16]',
+    enunciado: 'Após sete anos da ocupação de um terreno abandonado em Santo André, os condomínios foram inaugurados. O movimento vinha reivindicando o direito ao espaço. A Carta Magna, em seu art. 6º, garante a todos o direito à moradia.<br><br>O texto apresenta uma estratégia usada pelo movimento social para[cite: 16]',
     alternativas: [
       { letra: 'A', texto: 'fragilizar o poder público.' }, 
       { letra: 'B', texto: 'fomentar a economia solidária.' }, 
