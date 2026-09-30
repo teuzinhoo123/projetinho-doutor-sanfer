@@ -64,7 +64,7 @@ body {
 h1, h2, h3 { font-family: var(--font-head); margin: 0; color: var(--text); }
 p { margin: 0; }
 button, input, select { font-family: var(--font-body); }
-select, input[type="date"], input[type="time"], input[type="password"] {
+select, input[type="date"], input[type="time"], input[type="password"], input[type="text"] {
   width: 100%; padding: 12px 14px;
   border-radius: var(--radius-sm); border: 1px solid var(--border);
   background: var(--surface); color: var(--text); font-size: 15px;
@@ -327,3 +327,10 @@ html[data-theme="dark"] .icon-moon { display: block; }
   body { background: var(--bg); }
 }
 @media (prefers-reduced-motion: reduce) { * { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; } }
+
+/* ===== CONTAGEM REGRESSIVA ENEM ===== */
+.countdown-card { margin-bottom: var(--space-4); background: linear-gradient(135deg, var(--color-primary-100), var(--surface)); }
+.countdown-label { font-size: 12px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--text-muted); margin-bottom: var(--space-2); }
+.countdown-main { font-family: var(--font-head); font-size: 40px; font-weight: 800; color: var(--color-primary-700); line-height: 1.1; }
+.countdown-sub { font-size: 14px; color: var(--text); margin-top: var(--space-1); }
+.countdown-extra { font-size: 13px; color: var(--text-muted); margin-top: var(--space-3); padding-top: var(--space-3); border-top: 1px solid var(--border); }

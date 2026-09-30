@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Projeto Doutor Tiago Sanfer</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -52,6 +52,11 @@
       <div class="view-inner">
         <p class="greeting" id="greetingText">Bora estudar?</p>
 
+        <div class="card countdown-card" id="countdownCard" aria-live="polite">
+          <div class="countdown-label">Contagem regressiva · ENEM 2026</div>
+          <div id="countdownBody"></div>
+        </div>
+
         <div class="card card-hero">
           <h2 class="hero-title">O que vamos estudar hoje?</h2>
           <div id="wrapperDisciplina">
@@ -79,6 +84,11 @@
           </div>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 6l6 6-6 6"/></svg>
         </button>
+
+        <div class="card">
+          <h3 class="card-title">Tarefas de hoje</h3>
+          <div id="todayTasks" class="today-list"></div>
+        </div>
 
         <div class="card">
           <h3 class="card-title">Seu progresso global</h3>
@@ -151,9 +161,9 @@
 
         <!-- Área de Escrita e Correção IA -->
         <div class="card">
-          <h3 class="card-title">A tua Redação</h3>
-          <p class="hint">Escreve ou cola o teu texto aqui. O Professor IA irá corrigir com base nas 5 competências do ENEM.</p>
-          <textarea id="textoRedacao" rows="12" placeholder="Começa a escrever o teu texto dissertativo-argumentativo..." style="width: 100%; padding: 16px; border-radius: var(--radius-sm); border: 1px solid var(--border); font-family: var(--font-body); font-size: 15px; resize: vertical; margin-bottom: 16px; background: var(--surface-2); color: var(--text);"></textarea>
+          <h3 class="card-title">Sua redação</h3>
+          <p class="hint">Escreva ou cole seu texto aqui. O Professor IA irá corrigir com base nas 5 competências do ENEM.</p>
+          <textarea id="textoRedacao" rows="12" placeholder="Comece a escrever seu texto dissertativo-argumentativo..." style="width: 100%; padding: 16px; border-radius: var(--radius-sm); border: 1px solid var(--border); font-family: var(--font-body); font-size: 15px; resize: vertical; margin-bottom: 16px; background: var(--surface-2); color: var(--text);"></textarea>
           
           <button id="btnCorrigirRedacao" class="btn btn-primary btn-block" style="background: var(--color-primary-600); color: #fff;">✨ Corrigir com Professor IA</button>
           
@@ -196,12 +206,30 @@
       <button class="icon-btn icon-btn-sm modal-close" data-close="modalSettings">✕</button>
     </div>
     <div class="modal-body">
-      <label for="geminiKeyInput">Chave de API do Google Gemini</label>
-      <input type="password" id="geminiKeyInput" placeholder="Sua GEMINI_API_KEY">
-      <p class="hint">Sua chave fica salva apenas no seu navegador localmente.</p>
-      <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener" class="link-inline">Gerar chave gratuita no Google AI Studio ↗</a>
-      <button id="saveGeminiKey" class="btn btn-primary btn-block">Salvar chave</button>
-      <p class="save-confirm" id="keySaveConfirm" hidden>Chave salva!</p>
+      <label for="aiProvider">Provedor de IA</label>
+      <select id="aiProvider">
+        <option value="gemini">Google Gemini</option>
+        <option value="openai">OpenAI (ChatGPT)</option>
+        <option value="claude">Anthropic (Claude)</option>
+      </select>
+
+      <label for="aiKeyInput" style="margin-top:16px;">Chave de API</label>
+      <input type="password" id="aiKeyInput" autocomplete="off" placeholder="Cole a chave aqui">
+      <a id="aiKeyLink" href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener" class="link-inline" style="margin-bottom:16px;">Gerar chave ↗</a>
+
+      <label for="aiModelInput">Modelo (opcional)</label>
+      <input type="text" id="aiModelInput" list="aiModelList" autocomplete="off" placeholder="Deixe vazio para usar o padrão">
+      <datalist id="aiModelList"></datalist>
+      <p class="hint" id="aiHint"></p>
+
+      <p class="hint">Sua chave fica salva apenas no navegador deste aparelho e é enviada somente ao provedor escolhido. Não compartilhe este aparelho nem publique o site com uma chave preenchida.</p>
+
+      <div style="display:flex; gap:8px; margin-top:8px;">
+        <button id="testAIConfig" class="btn btn-outline" style="flex:1;">Testar conexão</button>
+        <button id="saveAIConfig" class="btn btn-primary" style="flex:1;">Salvar</button>
+      </div>
+      <p id="aiTestStatus" class="hint" style="margin-top:12px; min-height:20px;" role="status"></p>
+      <p class="save-confirm" id="keySaveConfirm" hidden>Configurações salvas!</p>
     </div>
   </div>
 </div>
